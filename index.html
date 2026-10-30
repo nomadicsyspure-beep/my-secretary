@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <title>나의 비서실</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2330;
+      --sub: #6b7080;
+      --accent: #4f46e5;
+      --line: #e6e8ef;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12141b;
+        --card: #1c1f2a;
+        --text: #eceef4;
+        --sub: #9aa0b2;
+        --accent: #8b85ff;
+        --line: #2a2e3b;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      padding: max(20px, env(safe-area-inset-top)) 16px 32px;
+    }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    header { margin: 12px 0 24px; }
+    .date { color: var(--sub); font-size: 14px; }
+    h1 { margin: 4px 0 0; font-size: 26px; }
+    .grid { display: grid; gap: 12px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .icon { font-size: 26px; width: 40px; text-align: center; }
+    .card b { display: block; font-size: 16px; }
+    .card span { color: var(--sub); font-size: 13px; }
+    .badge {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    footer { margin-top: 28px; color: var(--sub); font-size: 12px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="date" id="today"></div>
+      <h1>나의 비서실</h1>
+    </header>
+
+    <div class="grid">
+      <div class="card"><div class="icon">☀️</div><div><b>오늘 브리핑</b><span>오늘 일정과 할 일 한눈에</span></div><div class="badge">준비 중</div></div>
+      <div class="card"><div class="icon">📅</div><div><b>일정</b><span>월 · 주 · 일 캘린더</span></div><div class="badge">준비 중</div></div>
+      <div class="card"><div class="icon">✅</div><div><b>할 일</b><span>마감일 · 우선순위 · 완료 체크</span></div><div class="badge">준비 중</div></div>
+      <div class="card"><div class="icon">📝</div><div><b>메모</b><span>업무 메모 · 태그 분류</span></div><div class="badge">준비 중</div></div>
+      <div class="card"><div class="icon">🗂️</div><div><b>프로젝트</b><span>일정 · 할 일 · 메모를 프로젝트별로</span></div><div class="badge">준비 중</div></div>
+    </div>
+
+    <footer>v0.1 · 첫 화면</footer>
+  </div>
+
+  <script>
+    const d = new Date();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    document.getElementById('today').textContent =
+      `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  </script>
+</body>
+</html>
