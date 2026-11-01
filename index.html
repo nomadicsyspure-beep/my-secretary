@@ -3,63 +3,86 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#f3f2fb" id="themeColor">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="비서실">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>나의 비서실</title>
   <style>
     :root {
-      --bg: #f6f7fb;
+      --hue: 30;
+      --bg: hsl(var(--hue) 45% 96%);
       --card: #ffffff;
       --text: #1f2330;
       --sub: #6b7080;
-      --accent: #4f46e5;
-      --accent-soft: #eceafe;
-      --line: #e6e8ef;
+      --accent: hsl(var(--hue) 68% 46%);
+      --on-accent: #ffffff;
+      --accent-soft: hsl(var(--hue) 85% 94%);
+      --line: hsl(var(--hue) 20% 90%);
+      --shadow: 0 1px 2px rgba(20, 20, 40, .04), 0 8px 24px rgba(20, 20, 40, .06);
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #12141b;
-        --card: #1c1f2a;
+        --bg: hsl(var(--hue) 22% 9%);
+        --card: hsl(var(--hue) 16% 14%);
         --text: #eceef4;
         --sub: #9aa0b2;
-        --accent: #8b85ff;
-        --accent-soft: #272a45;
-        --line: #2a2e3b;
+        --accent: hsl(var(--hue) 85% 72%);
+        --on-accent: hsl(var(--hue) 40% 12%);
+        --accent-soft: hsl(var(--hue) 30% 21%);
+        --line: hsl(var(--hue) 14% 22%);
+        --shadow: none;
       }
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { background: var(--bg); transition: background-color 1.2s; }
     body {
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
       color: var(--text);
+      background: radial-gradient(120% 50% at 50% -10%, var(--accent-soft), transparent 70%) no-repeat;
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
-      padding: max(20px, env(safe-area-inset-top)) 16px 96px;
+      padding: max(20px, env(safe-area-inset-top)) 16px calc(110px + env(safe-area-inset-bottom));
       line-height: 1.5;
+      word-break: keep-all;
     }
     .wrap { max-width: 520px; margin: 0 auto; }
-    header { margin: 12px 0 20px; }
+    header { margin: 8px 4px 18px; }
     .date { color: var(--sub); font-size: 14px; }
-    h1 { margin: 4px 0 0; font-size: 26px; }
+    h1 { margin: 2px 0 0; font-size: 22px; letter-spacing: -.02em; }
+
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 20px;
+      border-radius: 22px;
       padding: 20px;
       margin-bottom: 12px;
+      box-shadow: var(--shadow);
     }
+    .card-title { font-weight: 700; margin-bottom: 10px; }
     .sub { color: var(--sub); font-size: 14px; }
-    .small { font-size: 12px; }
+    .small { font-size: 13px; margin: 8px 0 0; }
+    .grow { flex: 1; min-width: 0; }
+
     button {
       font: inherit;
       border: 0;
       border-radius: 14px;
-      padding: 14px 18px;
+      padding: 13px 18px;
       background: var(--accent);
-      color: #fff;
+      color: var(--on-accent);
       font-weight: 600;
       cursor: pointer;
+      transition: transform .1s, background-color .3s;
     }
+    button:active { transform: scale(.97); }
     button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
-    button.link { background: none; color: var(--sub); padding: 6px 8px; font-weight: 400; font-size: 13px; text-decoration: underline; }
+    button.link { background: none; color: var(--sub); padding: 6px 4px; font-weight: 400; font-size: 13px; text-decoration: underline; }
+    button.big { font-size: 18px; padding: 18px; border-radius: 18px; }
     .wide { width: 100%; }
     input[type=text], input[type=time], textarea {
       font: inherit;
@@ -69,30 +92,67 @@
       border: 1px solid var(--line);
       background: var(--bg);
       color: var(--text);
+      outline: none;
     }
-    textarea { resize: vertical; min-height: 72px; }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
     .row { display: flex; gap: 8px; align-items: center; }
     .row > input { flex: 1; }
 
+    /* 하루 막대 */
+    .daybar-wrap { cursor: pointer; margin-bottom: 18px; }
+    .daybar { position: relative; display: flex; gap: 3px; height: 8px; }
+    .daybar i { border-radius: 4px; background: hsl(var(--h) 70% 62%); }
+    .daybar i.past { opacity: .28; }
+    .marker {
+      position: absolute; top: -5px; width: 4px; height: 18px; border-radius: 2px;
+      background: var(--text); transform: translateX(-50%); transition: left .6s;
+    }
+    .daybar-labels { display: flex; justify-content: space-between; color: var(--sub); font-size: 11px; margin-top: 6px; }
+
     /* 지금 블록 */
-    .now-emoji { font-size: 44px; line-height: 1; }
-    .now-name { font-size: 24px; font-weight: 700; margin: 8px 0 2px; }
-    .remain { font-size: 15px; font-weight: 600; color: var(--accent); margin-top: 12px; }
+    .hero-top { display: flex; gap: 14px; align-items: center; }
+    .hero-emoji {
+      font-size: 34px; width: 60px; height: 60px; flex: none;
+      display: grid; place-items: center; border-radius: 18px; background: var(--accent-soft);
+    }
+    .hero-name { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+    .remain { font-size: 15px; font-weight: 700; color: var(--accent); margin-top: 16px; }
     .bar { height: 8px; background: var(--accent-soft); border-radius: 999px; overflow: hidden; margin-top: 6px; }
-    .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .6s; }
-    .section-title { font-size: 13px; color: var(--sub); margin: 18px 0 8px; font-weight: 600; }
+    .bar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width .6s; }
+    .insight { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 14px; display: grid; gap: 4px; }
+    .section-title { font-size: 13px; color: var(--sub); margin: 20px 0 8px; font-weight: 600; }
     .actions { list-style: none; padding: 0; margin: 0; }
-    .actions li { padding: 8px 0; border-top: 1px solid var(--line); display: flex; gap: 10px; align-items: center; cursor: pointer; }
+    .actions li { padding: 10px 0; border-top: 1px solid var(--line); display: flex; gap: 12px; align-items: center; cursor: pointer; }
     .actions li:first-child { border-top: 0; }
-    .check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); flex: none; display: grid; place-items: center; font-size: 13px; }
-    .done .check { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .check {
+      width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); flex: none;
+      display: grid; place-items: center; font-size: 13px; color: var(--on-accent); transition: all .2s;
+    }
+    .done .check { background: var(--accent); border-color: var(--accent); }
     .done span { color: var(--sub); text-decoration: line-through; }
     .energy { display: flex; gap: 8px; }
-    .energy button { flex: 1; background: var(--bg); border: 1px solid var(--line); font-size: 24px; padding: 10px; }
+    .energy button { flex: 1; background: var(--bg); border: 1px solid var(--line); font-size: 26px; padding: 8px; display: grid; gap: 0; }
+    .energy button small { font-size: 11px; color: var(--sub); font-weight: 500; }
     .energy button.on { border-color: var(--accent); background: var(--accent-soft); }
-    .minimum { margin-top: 10px; padding: 12px 14px; border-radius: 12px; background: var(--accent-soft); font-size: 14px; }
-    .one-thing { padding: 14px; border-radius: 12px; background: var(--accent-soft); font-weight: 600; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-    .next { display: flex; justify-content: space-between; align-items: center; }
+    .minimum { margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-size: 14px; }
+
+    /* 오늘의 한 가지 */
+    .one-thing {
+      padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); font-weight: 700;
+      display: flex; gap: 12px; align-items: center;
+    }
+    .check-btn {
+      width: 28px; height: 28px; padding: 0; border-radius: 50%; flex: none;
+      background: var(--card); border: 2px solid var(--accent);
+    }
+    .celebrate { font-size: 18px; }
+
+    /* 집중 타이머 */
+    .timer { text-align: center; }
+    .timer-left { font-size: 52px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--accent); }
+
+    .next { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 
     /* 전체 리듬 */
     details summary { cursor: pointer; color: var(--sub); font-size: 14px; list-style: none; }
@@ -100,24 +160,70 @@
     .timeline { margin-top: 12px; }
     .tl { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); align-items: center; }
     .tl .t { width: 76px; color: var(--sub); font-size: 13px; flex: none; }
+    .tl .dot { width: 10px; height: 10px; border-radius: 50%; background: hsl(var(--h) 70% 62%); flex: none; }
     .tl.past { opacity: .45; }
     .tl.cur b { color: var(--accent); }
+    .tl.cur .dot { box-shadow: 0 0 0 4px var(--accent-soft); }
 
+    /* 저녁 */
+    .review { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .flow { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .flow span { text-align: center; font-size: 12px; color: var(--sub); padding: 6px 8px; border-radius: 12px; background: var(--bg); line-height: 1.4; }
+    .flow b { display: block; font-size: 20px; }
     .worries { list-style: none; padding: 0; margin: 10px 0 0; }
-    .worries li { color: var(--sub); font-size: 14px; padding: 6px 0; }
+    .worries li { color: var(--sub); font-size: 14px; padding: 4px 0; }
     .worries li::before { content: "🍃 "; }
+    .floater {
+      position: fixed; z-index: 20; pointer-events: none;
+      padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); color: var(--text);
+      animation: floatAway 2.4s ease-in forwards;
+    }
+    @keyframes floatAway {
+      to { transform: translate(40px, -220px) rotate(-6deg) scale(.7); opacity: 0; }
+    }
+
+    /* 아침 */
+    .wake-card { text-align: center; padding: 28px 20px 20px; overflow: hidden; }
+    .sunrise {
+      width: 96px; height: 96px; margin: 4px auto 16px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #fde68a, #f59e0b 70%);
+      box-shadow: 0 0 60px rgba(245, 158, 11, .45);
+      animation: rise 1.4s ease-out both;
+    }
+    @keyframes rise { from { transform: translateY(40px); opacity: 0; } }
+    .wake-card .hero-name { margin-bottom: 4px; }
+    .wake-card .one-thing { justify-content: center; margin: 16px 0 0; }
+    .wake-card .big { margin-top: 20px; }
+    .mini { margin-top: 14px; text-align: left; }
+    .mini summary { text-align: center; }
+    .mini .row { margin-top: 10px; }
+    .intro { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: var(--sub); }
+
+    .hint { font-size: 13px; color: var(--sub); text-align: center; padding: 12px; border-radius: 14px; border: 1px dashed var(--line); margin-bottom: 12px; }
+
+    /* 토스트 */
+    .toast {
+      position: fixed; left: 50%; top: max(16px, env(safe-area-inset-top)); z-index: 30;
+      transform: translate(-50%, -12px); opacity: 0; visibility: hidden;
+      transition: transform .35s, opacity .35s, visibility .35s;
+      background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: 999px;
+      font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+    }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
 
     /* 숨 고르기 */
     .breathe-btn {
-      position: fixed; left: 50%; transform: translateX(-50%);
+      position: fixed; left: 50%; transform: translateX(-50%); z-index: 5;
       bottom: max(20px, env(safe-area-inset-bottom));
       border-radius: 999px; padding: 14px 24px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.18);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
     }
+    .breathe-btn:active { transform: translateX(-50%) scale(.97); }
     .overlay {
       position: fixed; inset: 0; background: var(--bg);
       display: none; flex-direction: column; align-items: center; justify-content: center;
-      gap: 32px; padding: 24px; z-index: 10;
+      gap: 36px; padding: 24px; z-index: 40;
     }
     .overlay.show { display: flex; }
     .circle {
@@ -129,6 +235,10 @@
     .phase { font-size: 22px; font-weight: 700; text-align: center; min-height: 33px; }
 
     footer { margin-top: 20px; color: var(--sub); font-size: 12px; text-align: center; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -138,11 +248,14 @@
       <h1>나의 비서실</h1>
     </header>
     <main id="app"></main>
-    <footer>v0.2.1 · 뇌 리듬 하루 · 블록 시간은 일반적인 기본값이에요</footer>
+    <div id="install"></div>
+    <footer>v0.3 · 뇌 리듬 하루 · 블록 시간은 일반적인 기본값이에요</footer>
   </div>
 
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <button class="breathe-btn" id="breatheBtn">🫁 숨 고르기</button>
-  <div class="overlay" id="overlay">
+  <div class="overlay" id="overlay" role="dialog" aria-label="숨 고르기">
     <div class="circle" id="circle"></div>
     <div>
       <div class="phase" id="phase">준비</div>
@@ -153,80 +266,114 @@
 
   <script>
     const KEY = 'rhythm.v1';
+    const HIST = 'rhythm.history';
     const MIN = 60 * 1000;
     const DAY_LENGTH = 20 * 60; // 기상 후 20시간이 지나면 새 하루로 봄
+    const EMO = ['😫', '😐', '🙂'];
+    const EMO_LABEL = ['힘들어요', '그럭저럭', '괜찮아요'];
 
-    // start/end: 기상 후 몇 분
+    // start/end: 기상 후 몇 분, hue: 블록 색
     const BLOCKS = [
-      { id: 'wake', emoji: '☀️', name: '깨우기', start: 0, end: 60,
+      { id: 'wake', emoji: '☀️', name: '깨우기', start: 0, end: 60, hue: 30,
         state: '몸과 뇌가 켜지는 중이에요',
         actions: ['햇빛 10분 쬐기 (창가도 좋아요)', '물 한 잔 마시기', '카페인은 1시간쯤 뒤에'],
         minimum: '커튼만 열어도 충분해요',
         nudge: '좋은 아침이에요. 햇빛부터 조금 볼까요?' },
-      { id: 'focus', emoji: '🔥', name: '집중 골든타임', start: 60, end: 240,
+      { id: 'focus', emoji: '🔥', name: '집중 골든타임', start: 60, end: 240, hue: 14,
         state: '집중력과 분석력이 가장 높은 시간이에요',
-        actions: ['가장 어려운 일 딱 1개', '90분 집중 → 10분 휴식', '알림·메신저 잠시 끄기'],
+        actions: ['오늘의 한 가지부터', '90분 집중 → 10분 휴식', '알림·메신저 잠시 끄기'],
         minimum: '25분만 해도 충분해요. 시작한 것 자체가 잘한 거예요',
         nudge: '골든타임이 시작됐어요. 오늘의 한 가지만 해볼까요?' },
-      { id: 'social', emoji: '💬', name: '소통·잡무', start: 240, end: 360,
+      { id: 'social', emoji: '💬', name: '소통·잡무', start: 240, end: 360, hue: 200,
         state: '아직 괜찮지만 조금씩 내려가는 중이에요',
         actions: ['연락 · 회의 · 메일', '정리 같은 가벼운 일', '점심 챙겨 먹기'],
         minimum: '답장 하나만 보내도 OK',
         nudge: '집중 시간 수고했어요. 이제 가벼운 일들 차례예요.' },
-      { id: 'dip', emoji: '😴', name: '오후 처짐', start: 360, end: 480,
+      { id: 'dip', emoji: '😴', name: '오후 처짐', start: 360, end: 480, hue: 268,
         state: '졸리고 집중이 떨어지는 게 정상이에요',
         actions: ['20분 낮잠 또는 10분 산책', '단순한 작업만', '물 마시기'],
         minimum: '눈 감고 5분만 쉬어요',
         nudge: '졸린 시간이 왔어요. 10분만 걸어볼까요?' },
-      { id: 'rise', emoji: '🌊', name: '2차 상승', start: 480, end: 660,
+      { id: 'rise', emoji: '🌊', name: '2차 상승', start: 480, end: 660, hue: 172,
         state: '몸과 창의력이 다시 올라오는 시간이에요',
         actions: ['운동이나 몸 움직이기', '아이디어 · 창작 작업', '좋아하는 취미'],
         minimum: '스트레칭 5분',
         nudge: '에너지가 다시 올라오는 시간이에요. 몸을 움직여 볼까요?' },
-      { id: 'wind', emoji: '🌙', name: '감속', start: 660, end: 840,
+      { id: 'wind', emoji: '🌙', name: '감속', start: 660, end: 840, hue: 238,
         state: '잠들 준비를 시작할 시간이에요',
         actions: ['조명 낮추기', '화면 줄이기', '걱정 내려놓기 · 내일 한 가지 정하기'],
         minimum: '폰 밝기만 낮춰도 좋아요',
         nudge: '천천히 속도를 줄일 시간이에요. 조명을 낮춰볼까요?' },
-      { id: 'sleep', emoji: '💤', name: '잘 준비', start: 840, end: 960,
+      { id: 'sleep', emoji: '💤', name: '잘 준비', start: 840, end: 960, hue: 222,
         state: '이제 쉬어도 돼요',
         actions: ['따뜻한 샤워', '폰은 손 닿지 않는 곳에', '오늘도 수고했어요'],
         minimum: '누워서 숨 고르기 한 번',
         nudge: '오늘도 수고했어요. 이제 잘 준비해요.' },
     ];
+    const LAST = BLOCKS[BLOCKS.length - 1];
 
-    function load() {
-      try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; }
+    function loadKey(k, fallback) {
+      try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; }
     }
-    function save() {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+    function saveKey(k, v) {
+      try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
     }
-    let state = load();
+    const fresh = (s = {}) => ({
+      focusTask: '', focusDone: false, tomorrowTask: '', energy: {}, done: {}, worries: [], sessions: 0, timer: null, ...s,
+    });
+    let state = fresh(loadKey(KEY, {}));
+    let history = loadKey(HIST, []); // [{ d: 'YYYY-M-D', wake }]
+    const save = () => saveKey(KEY, state);
     let editingWake = false;
     let lastBlockId = null;
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fmt = (t) => new Date(t).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+    const fmtMin = (m) => fmt(new Date(2000, 0, 1, Math.floor(m / 60), m % 60).getTime());
+    const fmtDur = (m) => {
+      const h = Math.floor(m / 60), r = Math.round(m % 60);
+      return h ? `${h}시간${r ? ` ${r}분` : ''}` : `${r}분`;
+    };
     const at = (min) => state.wake + min * MIN;
     const elapsed = () => (Date.now() - state.wake) / MIN;
     const dayActive = () => state.wake && elapsed() >= 0 && elapsed() < DAY_LENGTH;
+    const buzz = (p) => {
+      if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+      try { navigator.vibrate?.(p); } catch {}
+    };
 
     function currentBlock() {
       const e = elapsed();
-      return BLOCKS.find((b) => e >= b.start && e < b.end) || BLOCKS[BLOCKS.length - 1];
+      return BLOCKS.find((b) => e >= b.start && e < b.end) || LAST;
     }
 
+    // ---------- 기상 기록 ----------
+
+    const dateKey = (t) => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+    const minuteOfDay = (t) => { const d = new Date(t); return d.getHours() * 60 + d.getMinutes(); };
+    function recordWake(t) {
+      history = history.filter((h) => h.d !== dateKey(t));
+      history.push({ d: dateKey(t), wake: t });
+      history = history.slice(-30);
+      saveKey(HIST, history);
+    }
+    function forgetWake(t) {
+      history = history.filter((h) => h.wake !== t);
+      saveKey(HIST, history);
+    }
+    function avgWake(except) {
+      const recent = history.filter((h) => h.wake !== except).slice(-7);
+      if (recent.length < 2) return null;
+      return Math.round(recent.reduce((a, h) => a + minuteOfDay(h.wake), 0) / recent.length);
+    }
+
+    // ---------- 하루 시작 ----------
+
     function startDay(wake) {
-      state = {
-        wake,
-        focusTask: state.tomorrowTask || '',
-        tomorrowTask: '',
-        energy: {},
-        done: {},
-        worries: [],
-      };
+      state = fresh({ wake, focusTask: state.tomorrowTask || '' });
       editingWake = false;
+      recordWake(wake);
       save();
       askNotify();
       render();
@@ -249,28 +396,153 @@
 
     function wakeView() {
       const carry = state.tomorrowTask;
+      const avg = avgWake();
+      const firstTime = history.length === 0;
       return `
-        <div class="card" style="text-align:center; padding:32px 20px">
-          <div class="now-emoji">☀️</div>
-          <div class="now-name">좋은 아침이에요</div>
-          <p class="sub">일어난 시각을 기준으로 오늘 하루 리듬을 짜드릴게요.</p>
-          ${carry ? `<div class="one-thing" style="justify-content:center; margin:16px 0">오늘의 한 가지: ${esc(carry)}</div>` : ''}
-          <button class="wide" data-act="wake-now">일어났어요</button>
-          <div class="section-title" style="text-align:left">조금 전에 일어났다면</div>
-          <div class="row">
-            <input type="time" id="wakeTime" value="${nowHHMM()}">
-            <button class="ghost" data-act="wake-at">이 시각으로</button>
+        <section class="card wake-card">
+          <div class="sunrise"></div>
+          <div class="hero-name">좋은 아침이에요</div>
+          <div class="sub">일어난 시각을 기준으로 오늘 하루 리듬을 짜드릴게요.</div>
+          ${avg != null ? `<p class="sub small">최근 평균 기상 ${fmtMin(avg)}</p>` : ''}
+          ${carry ? `<div class="one-thing">🎯 오늘의 한 가지: ${esc(carry)}</div>` : ''}
+          <button class="big wide" data-act="wake-now">☀️ 일어났어요</button>
+          <details class="mini">
+            <summary>조금 전에 일어났다면</summary>
+            <div class="row">
+              <input type="time" id="wakeTime" value="${nowHHMM()}">
+              <button class="ghost" data-act="wake-at">이 시각으로</button>
+            </div>
+          </details>
+        </section>
+        ${firstTime ? `
+        <section class="card">
+          <div class="card-title">이렇게 도와줄게요</div>
+          <ul class="intro">
+            <li>일어난 시각부터 뇌 컨디션 흐름에 맞춰 하루를 7개 블록으로 나눠요</li>
+            <li>지금 블록 하나만 보여줘요. 놓친 건 그냥 다음 블록으로 넘어가요</li>
+            <li>힘든 날엔 최소 버전만 하면 돼요</li>
+          </ul>
+        </section>` : ''}`;
+    }
+
+    function dayBar() {
+      return `
+        <div class="daybar-wrap" data-act="open-timeline" aria-label="오늘 전체 리듬 보기">
+          <div class="daybar">
+            ${BLOCKS.map((x) => `<i style="flex:${x.end - x.start};--h:${x.hue}" data-end="${x.end}"></i>`).join('')}
+            <b class="marker" id="marker"></b>
           </div>
+          <div class="daybar-labels"><span>기상 ${fmt(state.wake)}</span><span>취침 ${fmt(at(LAST.end))}</span></div>
         </div>`;
+    }
+
+    function wakeInsight() {
+      const lines = [];
+      const avg = avgWake(state.wake);
+      if (avg != null) {
+        let diff = minuteOfDay(state.wake) - avg;
+        diff = ((diff + 720) % 1440 + 1440) % 1440 - 720;
+        lines.push(Math.abs(diff) <= 30
+          ? '👍 평소와 비슷한 시각에 일어났어요. 리듬이 안정적이에요'
+          : `${diff > 0 ? '⏰' : '🌅'} 평소보다 ${fmtDur(Math.abs(diff))} ${diff > 0 ? '늦게' : '일찍'} 일어났어요. 괜찮아요, 오늘 리듬은 지금부터예요`);
+      }
+      lines.push(`🛏 오늘 목표 취침 ${fmt(at(LAST.end))}`);
+      return `<div class="insight">${lines.map((l) => `<div>${l}</div>`).join('')}</div>`;
+    }
+
+    function timerCard() {
+      return `
+        <section class="card timer">
+          <div class="sub">⏱ ${state.timer.min}분 집중 중${state.focusTask ? ` · ${esc(state.focusTask)}` : ''}</div>
+          <div class="timer-left" id="timerLeft">--:--</div>
+          <div class="bar"><i id="timerBar"></i></div>
+          <button class="link" data-act="stop-timer">그만하기</button>
+        </section>`;
+    }
+
+    function oneThingCard() {
+      let body;
+      if (!state.focusTask) {
+        body = `
+          <div class="sub" style="margin-bottom:10px">골든타임에 할 일 딱 하나만 정해요. 나머지는 다 보너스예요.</div>
+          <div class="row">
+            <input type="text" id="focusInput" placeholder="예: 기획서 초안 쓰기" enterkeyhint="done" data-enter="set-focus">
+            <button data-act="set-focus">정하기</button>
+          </div>`;
+      } else if (state.focusDone) {
+        body = `
+          <div class="one-thing celebrate">🎉 <span class="grow">${esc(state.focusTask)}</span></div>
+          <p class="sub small">끝냈어요! 남은 하루는 전부 보너스예요. <button class="link" data-act="focus-undo">되돌리기</button></p>`;
+      } else {
+        body = `
+          <div class="one-thing">
+            <button class="check-btn" data-act="focus-done" aria-label="끝냈어요"></button>
+            <span class="grow">${esc(state.focusTask)}</span>
+            <button class="link" data-act="clear-focus">바꾸기</button>
+          </div>
+          ${state.timer ? '' : `
+          <div class="row" style="margin-top:10px">
+            <button class="ghost grow" data-act="timer" data-min="25">▶ 25분 집중</button>
+            <button class="ghost grow" data-act="timer" data-min="90">▶ 90분 집중</button>
+          </div>`}`;
+      }
+      return `
+        <section class="card">
+          <div class="card-title">🎯 오늘의 한 가지</div>
+          ${body}
+          ${state.sessions ? `<p class="sub small">오늘 집중 ${state.sessions}회 했어요</p>` : ''}
+        </section>`;
+    }
+
+    function eveningCards() {
+      const items = [];
+      if (state.focusDone && state.focusTask) items.push(`🎯 오늘의 한 가지: ${esc(state.focusTask)}`);
+      if (state.sessions) items.push(`⏱ 집중 ${state.sessions}회`);
+      for (const k of Object.keys(state.done)) {
+        if (!state.done[k]) continue;
+        const [id, i] = k.split('.');
+        const bl = BLOCKS.find((x) => x.id === id);
+        if (bl && bl.actions[i]) items.push(`${bl.emoji} ${esc(bl.actions[i])}`);
+      }
+      const flow = BLOCKS.filter((x) => state.energy[x.id] != null);
+      return `
+        <section class="card">
+          <div class="card-title">🌙 오늘 돌아보기</div>
+          ${items.length
+            ? `<ul class="review">${items.map((t) => `<li>${t}</li>`).join('')}</ul>`
+            : `<div class="sub">오늘은 그냥 흘러간 하루여도 괜찮아요. 여기까지 온 것만으로 충분해요.</div>`}
+          ${flow.length ? `
+            <div class="section-title">컨디션 흐름</div>
+            <div class="flow">${flow.map((x) => `<span><b>${EMO[state.energy[x.id]]}</b>${x.emoji}</span>`).join('')}</div>` : ''}
+        </section>
+
+        <section class="card">
+          <div class="card-title">🍃 걱정 내려놓기</div>
+          <textarea id="worryInput" placeholder="머릿속에 맴도는 걸 그냥 적어요. 적으면 여기 두고 가는 거예요."></textarea>
+          <button class="ghost wide" style="margin-top:8px" data-act="add-worry">내려놓기</button>
+          ${state.worries.length ? `
+            <details style="margin-top:12px">
+              <summary>오늘 내려놓은 걱정 ${state.worries.length}개</summary>
+              <ul class="worries">${state.worries.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>
+            </details>` : ''}
+        </section>
+
+        <section class="card">
+          <div class="card-title">🎯 내일 골든타임에 할 한 가지</div>
+          ${state.tomorrowTask
+            ? `<div class="one-thing"><span class="grow">${esc(state.tomorrowTask)}</span><button class="link" data-act="clear-tomorrow">바꾸기</button></div>
+               <p class="sub small">내일 아침에 그대로 이어서 보여줄게요.</p>`
+            : `<div class="row"><input type="text" id="tomorrowInput" placeholder="딱 하나만" enterkeyhint="done" data-enter="set-tomorrow"><button data-act="set-tomorrow">정하기</button></div>`}
+        </section>`;
     }
 
     function nowView() {
       const b = currentBlock();
       const e = elapsed();
-      const over = e >= BLOCKS[BLOCKS.length - 1].end;
-      const idx = BLOCKS.indexOf(b);
-      const next = BLOCKS[idx + 1];
+      const over = e >= LAST.end;
+      const next = BLOCKS[BLOCKS.indexOf(b) + 1];
       const energy = state.energy[b.id];
+      const evening = b.id === 'wind' || b.id === 'sleep';
 
       const actions = b.actions.map((a, i) => {
         const done = state.done[`${b.id}.${i}`];
@@ -278,57 +550,48 @@
           <div class="check">${done ? '✓' : ''}</div><span>${esc(a)}</span></li>`;
       }).join('');
 
-      let extra = '';
-      if (b.id === 'focus' || b.id === 'wake') {
-        extra = `<div class="section-title">오늘의 한 가지</div>` + (state.focusTask
-          ? `<div class="one-thing"><span>${esc(state.focusTask)}</span><button class="link" data-act="clear-focus">바꾸기</button></div>`
-          : `<div class="row"><input type="text" id="focusInput" placeholder="골든타임에 할 일 하나만"><button data-act="set-focus">정하기</button></div>`);
-      }
-      if (b.id === 'wind' || b.id === 'sleep') {
-        extra = `
-          <div class="section-title">걱정 내려놓기</div>
-          <textarea id="worryInput" placeholder="머릿속에 맴도는 걸 그냥 적어요. 적으면 여기 두고 가는 거예요."></textarea>
-          <button class="ghost wide" style="margin-top:8px" data-act="add-worry">내려놓기</button>
-          ${state.worries.length ? `<ul class="worries">${state.worries.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
-          <div class="section-title">내일 골든타임에 할 한 가지</div>
-          ${state.tomorrowTask
-            ? `<div class="one-thing"><span>${esc(state.tomorrowTask)}</span><button class="link" data-act="clear-tomorrow">바꾸기</button></div>`
-            : `<div class="row"><input type="text" id="tomorrowInput" placeholder="딱 하나만"><button data-act="set-tomorrow">정하기</button></div>`}`;
-      }
-
       return `
-        <div class="card">
-          <div class="now-emoji">${b.emoji}</div>
-          <div class="now-name">${b.name}</div>
-          <div class="sub">${b.state}</div>
+        ${state.timer ? timerCard() : ''}
+
+        <section class="card">
+          ${dayBar()}
+          <div class="hero-top">
+            <div class="hero-emoji">${b.emoji}</div>
+            <div>
+              <div class="hero-name">${b.name}</div>
+              <div class="sub">${b.state}</div>
+            </div>
+          </div>
           <div class="remain" id="remain"></div>
           <div class="bar"><i id="bar"></i></div>
+          ${b.id === 'wake' ? wakeInsight() : ''}
 
           <div class="section-title">지금 하면 좋은 것</div>
           <ul class="actions">${actions}</ul>
 
-          ${extra}
-
           <div class="section-title">지금 컨디션은?</div>
           <div class="energy">
-            ${['😫', '😐', '🙂'].map((em, i) => `<button class="${energy === i ? 'on' : ''}" data-act="energy" data-v="${i}">${em}</button>`).join('')}
+            ${EMO.map((em, i) => `<button class="${energy === i ? 'on' : ''}" data-act="energy" data-v="${i}" aria-label="${EMO_LABEL[i]}">${em}<small>${EMO_LABEL[i]}</small></button>`).join('')}
           </div>
           ${energy === 0 ? `<div class="minimum">💜 오늘은 최소 버전으로 가요. <b>${esc(b.minimum)}</b></div>` : ''}
-        </div>
+        </section>
 
-        <div class="card next">
+        ${evening ? eveningCards() : oneThingCard()}
+
+        <section class="card next">
           ${next && !over
-            ? `<div><div class="sub small">다음</div><b>${next.emoji} ${next.name}</b></div><div class="sub">${fmt(at(next.start))}</div>`
-            : `<div><b>오늘 리듬 끝</b><div class="sub small">${over ? '잘 시간이 지났어요. 푹 자요 💤' : '푹 쉬어요'}</div></div>`}
-        </div>
+            ? `<div><div class="sub" style="font-size:12px">다음</div><b>${next.emoji} ${next.name}</b></div><div class="sub">${fmt(at(next.start))}</div>`
+            : `<div><b>오늘 리듬 끝</b><div class="sub" style="font-size:13px">${over ? '잘 시간이 지났어요. 푹 자요 💤' : '푹 쉬어요'}</div></div>`}
+        </section>
 
-        <div class="card">
-          <details>
-            <summary>📋 오늘 전체 리듬 보기 · 기상 ${fmt(state.wake)}</summary>
+        <section class="card">
+          <details id="tl">
+            <summary>📋 오늘 전체 리듬 보기</summary>
             <div class="timeline">
               ${BLOCKS.map((x) => `
-                <div class="tl ${x === b ? 'cur' : (e >= x.end ? 'past' : '')}">
+                <div class="tl ${x === b ? 'cur' : (e >= x.end ? 'past' : '')}" style="--h:${x.hue}">
                   <div class="t">${fmt(at(x.start))}</div>
+                  <div class="dot"></div>
                   <div>${x.emoji} <b>${x.name}</b></div>
                 </div>`).join('')}
             </div>
@@ -338,21 +601,30 @@
                 : `<button class="link" data-act="edit-wake">기상 시각 수정</button>`}
             </div>
           </details>
-        </div>
+        </section>
 
         <button class="ghost wide" data-act="reset">🔄 초기화</button>`;
     }
 
+    function applyTheme(hue) {
+      document.documentElement.style.setProperty('--hue', hue);
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (bg) $('themeColor').setAttribute('content', bg);
+    }
+
     function render() {
       const app = $('app');
-      const openDetails = app.querySelector('details')?.open;
+      const tlOpen = $('tl')?.open;
       if (!dayActive()) {
         lastBlockId = null;
+        applyTheme(30);
         app.innerHTML = wakeView();
       } else {
-        lastBlockId = currentBlock().id;
+        const b = currentBlock();
+        lastBlockId = b.id;
+        applyTheme(b.hue);
         app.innerHTML = nowView();
-        if (openDetails) app.querySelector('details').open = true;
+        if (tlOpen) $('tl').open = true;
         tick();
         scheduleNotify();
       }
@@ -366,16 +638,49 @@
 
       if (!dayActive()) { if (lastBlockId !== null) render(); return; }
       const b = currentBlock();
-      if (b.id !== lastBlockId) { render(); return; }
+      if (b.id !== lastBlockId) {
+        render();
+        toast(`${b.emoji} ${b.nudge}`);
+        return;
+      }
+      if (checkTimer()) return;
 
       const e = elapsed();
       const left = Math.max(0, Math.ceil(b.end - e));
-      const pct = Math.min(100, ((e - b.start) / (b.end - b.start)) * 100);
-      const h = Math.floor(left / 60), m = left % 60;
       $('remain').textContent = left > 0
-        ? `${h ? `${h}시간 ` : ''}${m}분 남음 · ${fmt(at(b.end))}까지`
+        ? `${fmtDur(left)} 남음 · ${fmt(at(b.end))}까지`
         : `${fmt(at(b.end))}에 끝났어요`;
-      $('bar').style.width = `${pct}%`;
+      $('bar').style.width = `${Math.min(100, ((e - b.start) / (b.end - b.start)) * 100)}%`;
+      $('marker').style.left = `${Math.min(100, (e / LAST.end) * 100)}%`;
+      document.querySelectorAll('.daybar i').forEach((i) => i.classList.toggle('past', e >= Number(i.dataset.end)));
+
+      if (state.timer) {
+        const ms = Math.max(0, state.timer.end - Date.now());
+        const s = Math.ceil(ms / 1000);
+        $('timerLeft').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+        $('timerBar').style.width = `${100 - (ms / (state.timer.min * MIN)) * 100}%`;
+      }
+    }
+
+    // ---------- 집중 타이머 ----------
+
+    let timerTimeout = null;
+    function scheduleTimer() {
+      clearTimeout(timerTimeout);
+      if (state.timer) timerTimeout = setTimeout(checkTimer, Math.max(0, state.timer.end - Date.now()) + 50);
+    }
+    function checkTimer() {
+      if (!state.timer || Date.now() < state.timer.end) return false;
+      const late = Date.now() - state.timer.end;
+      const m = state.timer.min;
+      state.timer = null;
+      state.sessions += 1;
+      save();
+      if (late < MIN) notify('⏰ 집중 끝!', `${m}분 집중했어요. 이제 ${m >= 60 ? 10 : 5}분 쉬어요.`);
+      toast(`🎉 ${m}분 집중 완료! 잠깐 쉬어요`);
+      buzz([80, 60, 80]);
+      render();
+      return true;
     }
 
     // ---------- 알림 ----------
@@ -392,7 +697,7 @@
     function notify(title, body) {
       if (!('Notification' in window) || Notification.permission !== 'granted') return;
       try {
-        if (swReg) swReg.showNotification(title, { body });
+        if (swReg) swReg.showNotification(title, { body, icon: 'icons/icon-192.png' });
         else new Notification(title, { body });
       } catch {}
     }
@@ -401,11 +706,29 @@
       clearTimeout(notifyTimer);
       const next = BLOCKS.find((b) => b.start > elapsed());
       if (!next) return;
-      const ms = at(next.start) - Date.now();
       notifyTimer = setTimeout(() => {
         notify(`${next.emoji} ${next.name}`, next.nudge);
-        render();
-      }, ms);
+        tick();
+      }, at(next.start) - Date.now() + 50);
+    }
+
+    let toastTimer = null;
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    function floatAway(text, from) {
+      const r = from.getBoundingClientRect();
+      const f = document.createElement('div');
+      f.className = 'floater';
+      f.textContent = `🍃 ${text}`;
+      Object.assign(f.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px` });
+      document.body.appendChild(f);
+      setTimeout(() => f.remove(), 2600);
     }
 
     // ---------- 동작 ----------
@@ -413,32 +736,122 @@
     $('app').addEventListener('click', (ev) => {
       const el = ev.target.closest('[data-act]');
       if (!el) return;
-      const act = el.dataset.act;
-      if (act === 'wake-now') return startDay(Date.now());
-      if (act === 'wake-at') return startDay(timeInputToStamp($('wakeTime').value || nowHHMM()));
-      if (act === 'edit-wake') { editingWake = true; return render(); }
-      if (act === 'wake-fix') {
-        state.wake = timeInputToStamp($('wakeTime').value);
-        editingWake = false;
-        save();
-        return render();
+      switch (el.dataset.act) {
+        case 'wake-now': return startDay(Date.now());
+        case 'wake-at': return startDay(timeInputToStamp($('wakeTime').value || nowHHMM()));
+        case 'open-timeline': {
+          $('tl').open = true;
+          $('tl').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+        case 'edit-wake': editingWake = true; return render();
+        case 'wake-fix': {
+          forgetWake(state.wake);
+          state.wake = timeInputToStamp($('wakeTime').value);
+          recordWake(state.wake);
+          editingWake = false;
+          break;
+        }
+        case 'reset': {
+          if (!confirm('처음 화면으로 돌아갈까요?\n오늘 기록이 모두 지워져요.')) return;
+          forgetWake(state.wake);
+          state = fresh();
+          editingWake = false;
+          clearTimeout(timerTimeout);
+          break;
+        }
+        case 'toggle': {
+          const k = el.dataset.key;
+          state.done[k] = !state.done[k];
+          buzz(10);
+          break;
+        }
+        case 'energy': {
+          const id = currentBlock().id, v = Number(el.dataset.v);
+          state.energy[id] = state.energy[id] === v ? undefined : v;
+          buzz(10);
+          break;
+        }
+        case 'set-focus': {
+          const v = $('focusInput').value.trim();
+          if (!v) return;
+          state.focusTask = v;
+          break;
+        }
+        case 'clear-focus': state.focusTask = ''; state.focusDone = false; break;
+        case 'focus-done': {
+          state.focusDone = true;
+          if (state.timer) { state.timer = null; state.sessions += 1; clearTimeout(timerTimeout); }
+          buzz([30, 40, 30]);
+          toast('🎉 오늘의 한 가지 끝! 남은 하루는 보너스예요');
+          break;
+        }
+        case 'focus-undo': state.focusDone = false; break;
+        case 'timer': {
+          const m = Number(el.dataset.min);
+          state.timer = { end: Date.now() + m * MIN, min: m };
+          askNotify();
+          scheduleTimer();
+          break;
+        }
+        case 'stop-timer': {
+          state.timer = null;
+          clearTimeout(timerTimeout);
+          toast('괜찮아요. 시작한 것만으로 충분해요 💜');
+          break;
+        }
+        case 'set-tomorrow': {
+          const v = $('tomorrowInput').value.trim();
+          if (!v) return;
+          state.tomorrowTask = v;
+          break;
+        }
+        case 'clear-tomorrow': state.tomorrowTask = ''; break;
+        case 'add-worry': {
+          const ta = $('worryInput');
+          const v = ta.value.trim();
+          if (!v) return;
+          floatAway(v, ta);
+          state.worries.push(v);
+          toast('내려놓았어요. 오늘은 여기 두고 가요 🍃');
+          break;
+        }
       }
-      if (act === 'reset') {
-        if (confirm('처음 화면으로 돌아갈까요?\n오늘 기록이 모두 지워져요.')) { state = {}; editingWake = false; save(); render(); }
-        return;
-      }
-      if (act === 'toggle') { state.done[el.dataset.key] = !state.done[el.dataset.key]; }
-      if (act === 'energy') {
-        const id = currentBlock().id, v = Number(el.dataset.v);
-        state.energy[id] = state.energy[id] === v ? undefined : v;
-      }
-      if (act === 'set-focus') { const v = $('focusInput').value.trim(); if (!v) return; state.focusTask = v; }
-      if (act === 'clear-focus') state.focusTask = '';
-      if (act === 'set-tomorrow') { const v = $('tomorrowInput').value.trim(); if (!v) return; state.tomorrowTask = v; }
-      if (act === 'clear-tomorrow') state.tomorrowTask = '';
-      if (act === 'add-worry') { const v = $('worryInput').value.trim(); if (!v) return; state.worries.push(v); }
       save();
       render();
+    });
+
+    // 한글 입력 중(조합 중)에는 Enter를 무시
+    $('app').addEventListener('keydown', (ev) => {
+      const act = ev.target.dataset?.enter;
+      if (ev.key !== 'Enter' || !act || ev.isComposing) return;
+      ev.preventDefault();
+      $('app').querySelector(`[data-act="${act}"]`)?.click();
+    });
+
+    // ---------- 홈 화면 설치 ----------
+
+    let installPrompt = null;
+    const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    function renderInstall() {
+      const el = $('install');
+      if (standalone) el.innerHTML = '';
+      else if (installPrompt) el.innerHTML = `<button class="ghost wide" id="installBtn" style="margin-bottom:12px">📲 홈 화면에 앱으로 설치</button>`;
+      else if (isIOS) el.innerHTML = `<div class="hint">📲 Safari 아래 <b>공유</b> → <b>홈 화면에 추가</b>하면 앱처럼 쓰고 알림도 받을 수 있어요</div>`;
+      else el.innerHTML = '';
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      installPrompt = e;
+      renderInstall();
+    });
+    $('install').addEventListener('click', async (ev) => {
+      if (ev.target.id !== 'installBtn' || !installPrompt) return;
+      installPrompt.prompt();
+      await installPrompt.userChoice.catch(() => {});
+      installPrompt = null;
+      renderInstall();
     });
 
     // ---------- 숨 고르기 (두 번 들이쉬고 길게 내쉬기) ----------
@@ -461,6 +874,7 @@
       $('phaseSub').textContent = `${cycle + 1} / ${CYCLES}`;
       $('circle').style.transitionDuration = `${p.ms}ms`;
       $('circle').style.transform = `scale(${p.scale})`;
+      if (i === 0) buzz(20);
       breatheTimer = setTimeout(() => {
         const ni = (i + 1) % PHASES.length;
         breathe(ni === 0 ? cycle + 1 : cycle, ni);
@@ -481,7 +895,9 @@
 
     render();
     tick();
-    setInterval(tick, 30 * 1000);
+    renderInstall();
+    scheduleTimer();
+    setInterval(tick, 1000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   </script>
 </body>
