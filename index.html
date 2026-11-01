@@ -138,7 +138,7 @@
       <h1>나의 비서실</h1>
     </header>
     <main id="app"></main>
-    <footer>v0.2 · 뇌 리듬 하루 · 블록 시간은 일반적인 기본값이에요</footer>
+    <footer>v0.2.1 · 뇌 리듬 하루 · 블록 시간은 일반적인 기본값이에요</footer>
   </div>
 
   <button class="breathe-btn" id="breatheBtn">🫁 숨 고르기</button>
@@ -336,10 +336,11 @@
               ${editingWake
                 ? `<div class="row"><input type="time" id="wakeTime" value="${new Date(state.wake).toTimeString().slice(0, 5)}"><button class="ghost" data-act="wake-fix">수정</button></div>`
                 : `<button class="link" data-act="edit-wake">기상 시각 수정</button>`}
-              <button class="link" data-act="reset">오늘 다시 시작</button>
             </div>
           </details>
-        </div>`;
+        </div>
+
+        <button class="ghost wide" data-act="reset">🔄 초기화</button>`;
     }
 
     function render() {
@@ -423,7 +424,7 @@
         return render();
       }
       if (act === 'reset') {
-        if (confirm('오늘 기록을 지우고 다시 시작할까요?')) { state = { tomorrowTask: state.tomorrowTask }; save(); render(); }
+        if (confirm('처음 화면으로 돌아갈까요?\n오늘 기록이 모두 지워져요.')) { state = {}; editingWake = false; save(); render(); }
         return;
       }
       if (act === 'toggle') { state.done[el.dataset.key] = !state.done[el.dataset.key]; }
