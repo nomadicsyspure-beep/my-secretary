@@ -72,32 +72,35 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
   const mm = String(now.getMinutes()).padStart(2, '0');
 
   return (
-    <div className="space-y-3">
-      <header className="flex items-center justify-between">
-        <div className="flex items-baseline gap-2.5">
-          <Logo />
-          <span className="text-[12px] text-muted">
-            {now.getMonth() + 1}월 {now.getDate()}일 ({WEEKDAYS[now.getDay()]}) {hh}:{mm}
-          </span>
-        </div>
-        <div className="flex text-muted">
-          <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-card" onClick={() => navigate('me', { section: 'reminders' })} aria-label="알림 설정">
-            <Bell size={19} />
-          </button>
-          <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-card" onClick={() => navigate('me')} aria-label="설정">
-            <SettingsIcon size={19} />
-          </button>
-        </div>
-      </header>
+    <div>
+      <Hero
+        header={
+          <header className="flex items-center justify-between">
+            <div className="flex items-baseline gap-2.5">
+              <Logo />
+              <span className="text-[12px] font-medium text-ink/75">
+                {now.getMonth() + 1}월 {now.getDate()}일 ({WEEKDAYS[now.getDay()]}) {hh}:{mm}
+              </span>
+            </div>
+            <div className="flex gap-1.5 text-ink">
+              <button className="grid h-8 w-8 place-items-center rounded-full bg-bg/55 backdrop-blur" onClick={() => navigate('me', { section: 'reminders' })} aria-label="알림 설정">
+                <Bell size={17} />
+              </button>
+              <button className="grid h-8 w-8 place-items-center rounded-full bg-bg/55 backdrop-blur" onClick={() => navigate('me')} aria-label="설정">
+                <SettingsIcon size={17} />
+              </button>
+            </div>
+          </header>
+        }
+      >
+        <h1 className="font-display text-[22px] font-bold leading-snug md:text-[28px]">
+          {settings.name ? `${settings.name}님, ` : ''}지금, 어떤 상태인가요?
+        </h1>
+      </Hero>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
-        <Hero>
-          <h1 className="font-display text-[20px] font-bold leading-snug md:text-[26px]">
-            {settings.name ? `${settings.name}님, ` : ''}지금, 어떤 상태인가요?
-          </h1>
-        </Hero>
-
-        <section className="card space-y-3 p-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+      {/* 휴대폰에서는 기록 카드가 풍경의 뿌연 끝자락에 살짝 겹친다 */}
+      <div className="relative -mt-1 grid grid-cols-1 gap-3 md:mt-3 lg:grid-cols-2 lg:items-start">
+        <section className="card space-y-3 p-3 lg:col-start-2 lg:row-start-1">
           <MoodPicker value={mood} onChange={setMood} />
           {scales.map((k) => (
             <ScalePicker key={k} scale={k} value={levels[k] ?? null} onChange={(v) => setLevels((l) => ({ ...l, [k]: v }))} />
@@ -137,7 +140,7 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
           </div>
         </section>
 
-        <div className="space-y-3 lg:col-start-1">
+        <div className="space-y-3 lg:col-start-1 lg:row-start-1">
           {showRecall && (
             <button onClick={() => setRecallOpen(true)} className="card flex w-full items-center gap-2.5 px-4 py-2.5 text-left">
               <Moon size={16} className="shrink-0 text-primary" />

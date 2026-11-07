@@ -1,71 +1,46 @@
-// 홈 화면 위쪽의 풍경 그림. 시간대(새벽·낮·저녁·밤)에 따라 하늘과 해가 바뀐다.
+// 홈 화면 위쪽의 풍경. 시간대(새벽·낮·저녁·밤)에 따라 그림이 바뀌고,
+// 아래쪽은 배경색으로 뿌옇게 번지면서 글자가 그 위에 겹친다.
+// 휴대폰에서는 화면 끝까지 꽉 채우고, 머리글(로고·날짜)도 그림 위에 올린다.
 
 import type { ReactNode } from 'react';
 
 interface Scene {
-  sky: [string, string];
-  sun: { x: number; y: number; r: number; inner: string; outer: string };
-  hills: [string, string, string];
-  rock: string;
-  night: boolean;
+  key: 'dawn' | 'day' | 'evening' | 'night';
+  /** 좁은 화면에서 잘릴 때 어느 쪽을 남길지 (병아리가 보이도록) */
+  position: string;
 }
 
 function sceneFor(hour: number): Scene {
-  if (hour >= 5 && hour < 9)
-    return { sky: ['#F6D6B1', '#FBEEDB'], sun: { x: 92, y: 122, r: 30, inner: '#FFF3CF', outer: '#F5C068' }, hills: ['#DCDDBF', '#B4C199', '#8C9E67'], rock: '#B9AE97', night: false };
-  if (hour >= 9 && hour < 16)
-    return { sky: ['#E5EDD5', '#FBF6EA'], sun: { x: 300, y: 104, r: 22, inner: '#FFF7DA', outer: '#F4D573' }, hills: ['#D6DEC2', '#AEBF95', '#849A5D'], rock: '#BCB29C', night: false };
-  if (hour >= 16 && hour < 20)
-    return { sky: ['#F1BB91', '#FAE3C6'], sun: { x: 118, y: 128, r: 34, inner: '#FFE6AE', outer: '#F0A25B' }, hills: ['#D9C4A6', '#A8AD83', '#7C8B57'], rock: '#AE9E86', night: false };
-  return { sky: ['#283141', '#46506A'], sun: { x: 300, y: 102, r: 16, inner: '#FBF4DA', outer: '#E5D6A2' }, hills: ['#3B4652', '#33403A', '#29342A'], rock: '#575A50', night: true };
+  if (hour >= 5 && hour < 9) return { key: 'dawn', position: '68% 50%' };
+  if (hour >= 9 && hour < 16) return { key: 'day', position: '30% 45%' };
+  if (hour >= 16 && hour < 20) return { key: 'evening', position: '35% 55%' };
+  return { key: 'night', position: '55% 50%' };
 }
 
-export function Hero({ children }: { children: ReactNode }) {
+// 위: 머리글이 읽히도록 살짝 / 가운데: 그림 그대로 / 아래: 배경색으로 녹아들게
+const FADE =
+  'linear-gradient(to bottom, rgb(var(--bg) / .75) 0%, rgb(var(--bg) / .35) 16%, rgb(var(--bg) / 0) 32%, rgb(var(--bg) / 0) 46%, rgb(var(--bg) / .78) 78%, rgb(var(--bg)) 100%)';
+const BLUR_MASK = 'linear-gradient(to bottom, transparent 0%, black 75%)';
+
+export function Hero({ header, children }: { header: ReactNode; children: ReactNode }) {
   const s = sceneFor(new Date().getHours());
   return (
-    <div className="relative h-[116px] overflow-hidden rounded-3xl md:h-60">
-      <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full dark:brightness-[.82]" aria-hidden>
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={s.sky[0]} />
-            <stop offset="1" stopColor={s.sky[1]} />
-          </linearGradient>
-          <radialGradient id="sun">
-            <stop offset="0" stopColor={s.sun.inner} />
-            <stop offset="1" stopColor={s.sun.outer} />
-          </radialGradient>
-          <radialGradient id="glow">
-            <stop offset="0" stopColor={s.sun.outer} stopOpacity=".55" />
-            <stop offset="1" stopColor={s.sun.outer} stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <rect width="400" height="240" fill="url(#sky)" />
-        {s.night &&
-          [[40, 100], [90, 124], [150, 94], [210, 112], [250, 92], [360, 128], [120, 132], [345, 96]].map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.6 : 1} fill="#FFF8E0" opacity=".8" />
-          ))}
-        <circle cx={s.sun.x} cy={s.sun.y} r={s.sun.r * 2.6} fill="url(#glow)" />
-        <circle cx={s.sun.x} cy={s.sun.y} r={s.sun.r} fill="url(#sun)" />
-        {/* 먼 산 → 가까운 언덕 */}
-        <path d="M0 150 L38 124 L76 138 L128 98 L176 132 L226 108 L282 142 L336 112 L400 138 V240 H0Z" fill={s.hills[0]} />
-        <path d="M0 176 C58 152 110 166 160 152 C220 134 262 162 320 152 C360 145 386 156 400 153 V240 H0Z" fill={s.hills[1]} />
-        <path d="M0 208 C70 188 140 202 210 193 C280 184 340 197 400 188 V240 H0Z" fill={s.hills[2]} />
-        {/* 바위 위에서 쉬는 병아리 */}
-        <g transform="translate(322 188)">
-          <ellipse cx="0" cy="14" rx="40" ry="15" fill={s.rock} />
-          <ellipse cx="0" cy="-8" rx="24" ry="22" fill="#F6D46A" />
-          <ellipse cx="-6" cy="-14" rx="10" ry="8" fill="#FBE6A2" opacity=".8" />
-          <path d="M-11 -10 q4 3 8 0" stroke="#5B4A2E" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-          <path d="M5 -10 q4 3 8 0" stroke="#5B4A2E" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-          <circle cx="-13" cy="-3" r="3" fill="#F2A98B" opacity=".6" />
-          <circle cx="15" cy="-3" r="3" fill="#F2A98B" opacity=".6" />
-          <path d="M0 -6 l4 3 l-4 2 l-4 -2Z" fill="#E9A044" />
-          <path d="M0 -30 v-6" stroke="#6F8A3E" strokeWidth="2" strokeLinecap="round" />
-          <path d="M0 -35 c-2 -6 -8 -8 -12 -6 c2 5 7 7 12 6Z" fill="#7E9A48" />
-          <path d="M0 -35 c2 -6 8 -8 12 -6 c-2 5 -7 7 -12 6Z" fill="#94B05A" />
-        </g>
-      </svg>
-      <div className={`relative px-4 py-3.5 ${s.night ? 'text-[#F5EFDD]' : 'text-forest'}`}>{children}</div>
+    <div className="relative -mx-4 -mt-[max(10px,env(safe-area-inset-top))] h-[calc(190px+env(safe-area-inset-top))] overflow-hidden [@media(min-height:820px)]:h-[calc(236px+env(safe-area-inset-top))] [@media(min-height:900px)]:h-[calc(268px+env(safe-area-inset-top))] md:mx-0 md:mt-0 md:!h-80 md:rounded-3xl">
+      <img
+        src={`./scenes/${s.key}-sm.webp`}
+        srcSet={`./scenes/${s.key}-sm.webp 720w, ./scenes/${s.key}.webp 1280w`}
+        sizes="(min-width: 768px) 1000px, 100vw"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: s.position }}
+      />
+      <div className="absolute inset-0" style={{ background: FADE }} />
+      {/* 아래쪽으로 갈수록 살짝 흐려지게 */}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 backdrop-blur-[3px]" style={{ maskImage: BLUR_MASK, WebkitMaskImage: BLUR_MASK }} />
+      <div className="relative flex h-full flex-col justify-between px-4 pb-2 pt-[max(10px,env(safe-area-inset-top))] md:px-6 md:pb-5 md:pt-4">
+        {header}
+        <div className="[text-shadow:0_1px_12px_rgb(var(--bg))]">{children}</div>
+      </div>
     </div>
   );
 }
