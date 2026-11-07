@@ -11,9 +11,10 @@ interface Scene {
 }
 
 function sceneFor(hour: number): Scene {
-  if (hour >= 5 && hour < 9) return { key: 'dawn', position: '68% 50%' };
-  if (hour >= 9 && hour < 16) return { key: 'day', position: '30% 45%' };
-  if (hour >= 16 && hour < 20) return { key: 'evening', position: '35% 55%' };
+  // 새벽 4–8시 · 낮 8–15시 · 저녁 15–19시 · 밤 19–4시
+  if (hour >= 4 && hour < 8) return { key: 'dawn', position: '68% 50%' };
+  if (hour >= 8 && hour < 15) return { key: 'day', position: '30% 45%' };
+  if (hour >= 15 && hour < 19) return { key: 'evening', position: '35% 55%' };
   return { key: 'night', position: '55% 50%' };
 }
 
