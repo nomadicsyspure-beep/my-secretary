@@ -73,26 +73,24 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
 
   return (
     <div>
-      <Hero
-        header={
-          <header className="flex items-center justify-between">
-            <div className="flex items-baseline gap-2.5">
-              <Logo />
-              <span className="text-[12px] font-medium text-ink/75">
-                {now.getMonth() + 1}월 {now.getDate()}일 ({WEEKDAYS[now.getDay()]}) {hh}:{mm}
-              </span>
-            </div>
-            <div className="flex gap-1.5 text-ink">
-              <button className="grid h-8 w-8 place-items-center rounded-full bg-bg/55 backdrop-blur" onClick={() => navigate('me', { section: 'reminders' })} aria-label="알림 설정">
-                <Bell size={17} />
-              </button>
-              <button className="grid h-8 w-8 place-items-center rounded-full bg-bg/55 backdrop-blur" onClick={() => navigate('me')} aria-label="설정">
-                <SettingsIcon size={17} />
-              </button>
-            </div>
-          </header>
-        }
-      >
+      <header className="mb-1 flex items-center justify-between">
+        <div className="flex items-baseline gap-2.5">
+          <Logo />
+          <span className="text-[12px] text-muted">
+            {now.getMonth() + 1}월 {now.getDate()}일 ({WEEKDAYS[now.getDay()]}) {hh}:{mm}
+          </span>
+        </div>
+        <div className="flex gap-1 text-muted">
+          <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-card" onClick={() => navigate('me', { section: 'reminders' })} aria-label="알림 설정">
+            <Bell size={17} />
+          </button>
+          <button className="grid h-8 w-8 place-items-center rounded-full hover:bg-card" onClick={() => navigate('me')} aria-label="설정">
+            <SettingsIcon size={17} />
+          </button>
+        </div>
+      </header>
+
+      <Hero>
         <h1 className="font-display text-[22px] font-bold leading-snug md:text-[28px]">
           {settings.name ? `${settings.name}님, ` : ''}지금, 어떤 상태인가요?
         </h1>
