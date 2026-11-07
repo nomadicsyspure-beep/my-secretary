@@ -1,17 +1,17 @@
-// 오프라인 지원 + 알림용 서비스 워커
-// 항상 네트워크를 먼저 확인해서, 사이트를 업데이트하면 바로 새 버전이 보이게 함
-const CACHE = 'secretary-v1';
-const ASSETS = ['./', 'index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+// LIFE OS 서비스 워커: 오프라인에서도 열리게 하고, 알림을 띄운다.
+// 항상 네트워크를 먼저 확인하므로 사이트를 업데이트하면 바로 새 버전이 보인다.
+const CACHE = 'life-os-v1';
+const SHELL = ['./', 'index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/badge-96.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -27,16 +27,22 @@ self.addEventListener('fetch', (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(req).then((r) => r || caches.match('./')))
+      .catch(() => caches.match(req).then((hit) => hit || caches.match('./'))),
   );
 });
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
   e.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((list) => {
-      if (list.length) return list[0].focus();
-      return self.clients.openWindow('./');
-    })
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ('focus' in c) {
+          c.navigate(url).catch(() => {});
+          return c.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
   );
 });

@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 색은 "R G B" 형태로 두고 tailwind.config.js 에서 투명도와 함께 쓴다 */
+:root {
+  --bg: 250 246 238;      /* 따뜻한 크림 */
+  --bg2: 243 236 222;     /* 연한 베이지 */
+  --card: 255 253 248;    /* 아이보리 */
+  --ink: 46 52 38;        /* 짙은 숲색 글자 */
+  --muted: 125 120 103;
+  --line: 232 224 207;
+  --primary: 94 114 58;   /* 올리브 그린 */
+  --primary-ink: 255 255 255;
+  --primary-soft: 230 235 214;
+  --sage: 156 175 136;
+  --forest: 52 70 40;
+  --butter: 242 210 122;
+  --apricot: 242 179 138;
+  --brown: 138 106 79;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 27 30 24;
+  --bg2: 33 37 29;
+  --card: 38 43 34;
+  --ink: 236 231 216;
+  --muted: 167 162 145;
+  --line: 58 64 51;
+  --primary: 168 189 122;
+  --primary-ink: 27 30 24;
+  --primary-soft: 51 61 39;
+  --sage: 128 147 110;
+  --forest: 52 70 40;
+  color-scheme: dark;
+}
+
+html {
+  background: rgb(var(--bg));
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@layer components {
+  .card {
+    @apply rounded-4xl border border-line bg-card shadow-soft;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold transition active:scale-[.97] disabled:opacity-40 disabled:active:scale-100;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-primary-ink;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-card text-ink;
+  }
+  .field {
+    @apply w-full rounded-2xl border border-line bg-bg px-4 py-3 text-[15px] text-ink outline-none placeholder:text-muted/70 focus:border-primary;
+  }
+  .label {
+    @apply mb-2 block text-[13px] font-semibold text-muted;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-bg px-3 py-1.5 text-[13px] text-ink;
+  }
+  .chip-on {
+    @apply border-primary bg-primary-soft font-semibold;
+  }
+}
+
+/* 그래프 글자·선 색을 테마에 맞춘다 */
+.recharts-cartesian-axis-tick-value {
+  fill: rgb(var(--muted));
+  font-size: 11px;
+}
+.recharts-cartesian-grid line {
+  stroke: rgb(var(--line));
+}
+.recharts-tooltip-cursor {
+  fill: rgb(var(--primary-soft) / 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
