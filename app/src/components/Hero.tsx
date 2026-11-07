@@ -26,7 +26,7 @@ const BLUR_MASK = 'linear-gradient(to bottom, transparent 0%, black 75%)';
 export function Hero({ header, children }: { header: ReactNode; children: ReactNode }) {
   const s = sceneFor(new Date().getHours());
   return (
-    <div className="relative -mx-4 -mt-[max(10px,env(safe-area-inset-top))] h-[calc(190px+env(safe-area-inset-top))] overflow-hidden [@media(min-height:820px)]:h-[calc(236px+env(safe-area-inset-top))] [@media(min-height:900px)]:h-[calc(268px+env(safe-area-inset-top))] md:mx-0 md:mt-0 md:!h-80 md:rounded-3xl">
+    <div className="relative -mx-4 -mt-[max(10px,env(safe-area-inset-top))] h-[calc(208px+env(safe-area-inset-top))] overflow-hidden [@media(min-height:770px)]:h-[calc(230px+env(safe-area-inset-top))] [@media(min-height:820px)]:h-[calc(266px+env(safe-area-inset-top))] [@media(min-height:900px)]:h-[calc(300px+env(safe-area-inset-top))] md:mx-0 md:mt-0 md:!h-80 md:rounded-3xl">
       {/* 데이터를 아끼려고 휴대폰은 작은 그림(약 60KB), 태블릿·PC만 큰 그림을 받는다 */}
       <picture>
         <source media="(min-width: 768px)" srcSet={`./scenes/${s.key}.webp`} />
