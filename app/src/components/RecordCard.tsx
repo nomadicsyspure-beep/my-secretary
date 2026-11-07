@@ -1,8 +1,8 @@
 // 타임라인에 보이는 기록 한 개
 
-import { CalendarClock, Camera, Feather, Lightbulb, Mic, Pencil, Smile, History } from 'lucide-react';
+import { BedDouble, CalendarClock, Camera, Feather, Lightbulb, Mic, Pencil, Smile, History } from 'lucide-react';
 import { RECORD_TYPES, levelLabel, moodOf } from '../lib/constants';
-import { fmtDate, fmtTime, isRecalled } from '../lib/dates';
+import { fmtDate, fmtMinutes, fmtTime, isRecalled } from '../lib/dates';
 import type { LifeRecord, RecordType, ScaleKey } from '../lib/types';
 import { StoredAudio, StoredImage } from './Attachment';
 
@@ -14,7 +14,15 @@ export const TYPE_ICONS: Record<RecordType, typeof Pencil> = {
   event: CalendarClock,
   idea: Lightbulb,
   thought: Feather,
+  sleep: BedDouble,
 };
+
+/** 수면 기록 한 줄: '23:30 → 07:10 · 7시간 40분' */
+export function sleepLine(r: LifeRecord) {
+  if (!r.started_at) return null;
+  const min = (Date.parse(r.occurred_at) - Date.parse(r.started_at)) / 60000;
+  return `${fmtTime(r.started_at)} → ${fmtTime(r.occurred_at)} · ${fmtMinutes(min)}`;
+}
 
 const SCALE_SHORT: Record<ScaleKey, string> = { energy: '에너지', focus: '집중', stress: '부담감' };
 
@@ -46,7 +54,7 @@ export function RecordRow({ record, onOpen }: { record: LifeRecord; onOpen: (r: 
     mood && `${mood.emoji} ${mood.label}`,
     ...(['energy', 'focus', 'stress'] as ScaleKey[]).filter((k) => record[k] != null).map((k) => `${SCALE_SHORT[k]} ${levelLabel(k, record[k]!)}`),
   ].filter(Boolean);
-  const text = state.length ? state.join(' · ') : record.content || RECORD_TYPES[record.record_type].label;
+  const text = record.record_type === 'sleep' ? `수면 ${sleepLine(record) ?? ''}` : state.length ? state.join(' · ') : record.content || RECORD_TYPES[record.record_type].label;
   return (
     <button onClick={() => onOpen(record)} className="flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left transition hover:bg-bg active:bg-bg">
       <span className="w-10 shrink-0 text-[12px] font-semibold tabular-nums text-muted">{fmtTime(record.occurred_at)}</span>
@@ -76,6 +84,7 @@ export function RecordCard({ record, onOpen }: { record: LifeRecord; onOpen: (r:
         )}
         {record.prompt && <p className="text-[12px] text-muted">“{record.prompt}”</p>}
         <StateChips record={record} />
+        {record.record_type === 'sleep' && <p className="text-[14px] font-semibold">{sleepLine(record)}</p>}
         {record.content && <p className="line-clamp-4 whitespace-pre-line text-[14px] leading-relaxed">{record.content}</p>}
         {record.record_type === 'photo' && record.attachment_url && (
           <StoredImage url={record.attachment_url} className="h-36 w-full rounded-xl" />

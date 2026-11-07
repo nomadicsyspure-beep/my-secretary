@@ -1,11 +1,12 @@
 // 기록 (메인 홈): 지금의 상태를 원터치로 남기는 곳. 휴대폰 한 화면 안에 다 들어오게 만든다.
 // 통계나 점수는 보여주지 않는다.
 
-import { Bell, Check, ChevronRight, Moon, Plus, Settings as SettingsIcon } from 'lucide-react';
+import { BedDouble, Bell, Check, ChevronRight, Moon, Plus, Settings as SettingsIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Hero } from '../components/Hero';
 import { MoodPicker, ScalePicker } from '../components/Pickers';
 import { RecordRow } from '../components/RecordCard';
+import { SleepSheet } from '../components/SleepSheet';
 import type { AddRequest } from '../components/Sheets';
 import { Logo, Sheet } from '../components/ui';
 import { RECALL_QUESTIONS, RECORD_SCALES, levelLabel, moodOf, scaleOf } from '../lib/constants';
@@ -38,6 +39,7 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
   const [saving, setSaving] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
   const [recallOpen, setRecallOpen] = useState(false);
+  const [sleepOpen, setSleepOpen] = useState(false);
 
   const scales = RECORD_SCALES.filter((k) => settings.scales[k]);
   // 감정·집중력·부담감은 각각 따로 기록할 수 있다. 하나만 골라도 저장된다.
@@ -68,6 +70,18 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
   const today = records.filter((r) => dateKey(r.occurred_at) === todayKey);
   const showRecall =
     settings.recall.enabled && now >= todayAt(settings.recall.time, now) && settings.recallDismissedOn !== todayKey;
+
+  // 아침(4–15시)에 오늘 일어난 수면 기록이 없으면 어젯밤 수면을 묻는다.
+  // 그날 처음 열 때 한 번만 창을 띄우고, 닫으면 한 줄 카드로 남긴다.
+  const sleptToday = records.some((r) => r.record_type === 'sleep' && dateKey(r.occurred_at) === todayKey);
+  const showSleep =
+    settings.sleepPrompt && now.getHours() >= 4 && now.getHours() < 15 && !sleptToday && settings.sleepDismissedOn !== todayKey;
+  useEffect(() => {
+    if (showSleep && settings.sleepPromptedOn !== todayKey) {
+      setSleepOpen(true);
+      update({ sleepPromptedOn: todayKey });
+    }
+  }, [showSleep, todayKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const hh = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
 
@@ -139,7 +153,16 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
         </section>
 
         <div className="space-y-3 lg:col-start-1 lg:row-start-1">
-          {showRecall && (
+          {showSleep ? (
+            <button onClick={() => setSleepOpen(true)} className="card flex w-full items-center gap-2.5 px-4 py-2.5 text-left">
+              <BedDouble size={16} className="shrink-0 text-primary" />
+              <span className="min-w-0 flex-1 truncate text-[13px]">
+                <b>어젯밤 수면</b>
+                <span className="text-muted"> · 언제 자고 일어났나요?</span>
+              </span>
+              <ChevronRight size={16} className="text-muted" />
+            </button>
+          ) : showRecall && (
             <button onClick={() => setRecallOpen(true)} className="card flex w-full items-center gap-2.5 px-4 py-2.5 text-left">
               <Moon size={16} className="shrink-0 text-primary" />
               <span className="min-w-0 flex-1 truncate text-[13px]">
@@ -169,6 +192,15 @@ export function RecordScreen({ onAdd, onOpen }: { onAdd: (r: AddRequest) => void
           )}
         </div>
       </div>
+
+      <SleepSheet
+        open={sleepOpen}
+        onClose={() => setSleepOpen(false)}
+        onSkipToday={() => {
+          update({ sleepDismissedOn: todayKey });
+          setSleepOpen(false);
+        }}
+      />
 
       <Sheet open={recallOpen} onClose={() => setRecallOpen(false)} title="오늘의 기억 복원">
         <p className="-mt-2 mb-3 text-[13px] text-muted">오늘 기록하지 못한 순간 중 기억하고 싶은 것이 있나요? 모두 선택이에요.</p>

@@ -7,7 +7,7 @@
 // - 모든 문장에는 근거가 된 기록 id 를 붙인다.
 
 import { ALL_MOODS, RECORD_SCALES, moodOf, scaleOf } from './constants';
-import { PARTS, WEEKDAYS, dateKey, partOfDay } from './dates';
+import { PARTS, WEEKDAYS, dateKey, fmtMinutes, partOfDay } from './dates';
 import type { LifeRecord, MoodKey, ScaleKey } from './types';
 
 export const MIN_RECORDS = 5;
@@ -245,4 +245,80 @@ export function usedTags(records: LifeRecord[]) {
   const counts = new Map<string, number>();
   for (const r of records) for (const t of r.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([tag, count]) => ({ tag, count }));
+}
+
+// ---------- 수면 ----------
+
+export const MIN_SLEEPS = 3;
+
+export const sleepMinutes = (r: LifeRecord) => (Date.parse(r.occurred_at) - Date.parse(r.started_at!)) / 60000;
+/** 잠든 시각이 있고 길이가 말이 되는(0분 초과 20시간 이하) 수면 기록 */
+export const sleepRecords = (records: LifeRecord[]) =>
+  records.filter((r) => r.record_type === 'sleep' && r.started_at && sleepMinutes(r) > 0 && sleepMinutes(r) <= 20 * 60);
+
+/** 자정을 넘나드는 시각의 평균: 정오 이전은 다음 날로 보고 더한다 (예: 23:30, 00:30 → 00:00) */
+function averageClock(minutes: number[]) {
+  const shifted = minutes.map((m) => (m < 12 * 60 ? m + 1440 : m));
+  return (avg(shifted)! % 1440);
+}
+const minuteOfDay = (iso: string) => {
+  const d = new Date(iso);
+  return d.getHours() * 60 + d.getMinutes();
+};
+
+/** 평균 수면 시간·잠든 시각·일어난 시각과 밤마다의 수면 시간 (일어난 날 기준) */
+export function sleepSummary(records: LifeRecord[]) {
+  const list = sleepRecords(records);
+  if (list.length < MIN_SLEEPS) return null;
+  const nights = [...list]
+    .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
+    .map((r) => {
+      const k = dateKey(r.occurred_at);
+      return { date: k, label: `${Number(k.slice(5, 7))}/${Number(k.slice(8))}`, hours: round1(sleepMinutes(r) / 60), id: r.id };
+    });
+  return {
+    count: list.length,
+    avgMinutes: avg(list.map(sleepMinutes))!,
+    // 잠든 시각은 밤 12시를 넘나들므로 정오 기준으로 이어 붙여 평균 낸다
+    avgBed: averageClock(list.map((r) => minuteOfDay(r.started_at!))),
+    avgWake: avg(list.map((r) => minuteOfDay(r.occurred_at)))!,
+    nights,
+  };
+}
+
+/**
+ * 적게 잔 날 vs 많이 잔 날의 집중력·부담감 비교 (가운데 값으로 나눔).
+ * 일어난 날의 상태 기록과 비교한다. 양쪽 모두 3일·3개 이상일 때만 말한다.
+ */
+export function sleepObservations(records: LifeRecord[]): Observation[] {
+  const byDay = new Map<string, LifeRecord>();
+  for (const r of sleepRecords(records)) {
+    const k = dateKey(r.occurred_at);
+    const prev = byDay.get(k);
+    if (!prev || sleepMinutes(r) > sleepMinutes(prev)) byDay.set(k, r); // 낮잠보다 밤잠(긴 쪽)
+  }
+  if (byDay.size < MIN_GROUP * 2) return [];
+  const sorted = [...byDay.values()].map(sleepMinutes).sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+  const shortDays = new Set([...byDay].filter(([, r]) => sleepMinutes(r) < median).map(([k]) => k));
+  const longDays = new Set([...byDay].filter(([, r]) => sleepMinutes(r) >= median).map(([k]) => k));
+  if (shortDays.size < MIN_GROUP || longDays.size < MIN_GROUP) return [];
+
+  const out: Observation[] = [];
+  for (const key of RECORD_SCALES) {
+    const list = withScale(records, key);
+    const short = list.filter((r) => shortDays.has(dateKey(r.occurred_at)));
+    const long = list.filter((r) => longDays.has(dateKey(r.occurred_at)));
+    if (short.length < MIN_GROUP || long.length < MIN_GROUP) continue;
+    const a = round1(avg(short.map((r) => r[key]!))!);
+    const b = round1(avg(long.map((r) => r[key]!))!);
+    if (Math.abs(a - b) < MIN_DIFF) continue;
+    const sleepIds = [...shortDays, ...longDays].map((k) => byDay.get(k)!.id);
+    out.push({
+      id: `sleep-${key}`,
+      text: `${fmtMinutes(median)}보다 적게 잔 날(${shortDays.size}일)의 ${scaleOf(key).label} 평균은 ${a}, 더 잔 날(${longDays.size}일)은 ${b}였어요.`,
+      evidence: [...sleepIds, ...short.map((r) => r.id), ...long.map((r) => r.id)],
+    });
+  }
+  return out;
 }

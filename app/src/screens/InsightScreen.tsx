@@ -6,7 +6,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ResponsiveContaine
 import { StateChips } from '../components/RecordCard';
 import { Empty, Segmented } from '../components/ui';
 import { scaleOf } from '../lib/constants';
-import { fmtDate, fmtTime } from '../lib/dates';
+import { fmtClock, fmtDate, fmtMinutes, fmtTime } from '../lib/dates';
 import {
   MIN_DAYS,
   MIN_RECORDS,
@@ -16,7 +16,10 @@ import {
   moodCounts,
   moodObservations,
   partAverages,
+  MIN_SLEEPS,
   rhythmObservations,
+  sleepObservations,
+  sleepSummary,
   scaleObservations,
   sufficiency,
   tagObservations,
@@ -29,12 +32,13 @@ import {
 import { useRecords } from '../lib/records';
 import type { LifeRecord, ScaleKey } from '../lib/types';
 
-type Area = 'mood' | ScaleKey | 'rhythm' | 'activity';
+type Area = 'mood' | ScaleKey | 'sleep' | 'rhythm' | 'activity';
 const AREAS: { key: Area; label: string }[] = [
   { key: 'mood', label: '감정' },
   { key: 'focus', label: '집중력' },
   { key: 'stress', label: '부담감' },
   { key: 'rhythm', label: '생활 리듬' },
+  { key: 'sleep', label: '수면' },
   { key: 'activity', label: '활동과 상태' },
 ];
 
@@ -156,6 +160,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
   const suff = sufficiency(list);
 
   const observations = useMemo(() => {
+    if (area === 'sleep') return sleepObservations(list);
     if (!suff.enough && area !== 'activity') return [];
     if (area === 'mood') return moodObservations(list);
     if (area === 'rhythm') return rhythmObservations(list);
@@ -173,6 +178,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
   }
 
   const moods = moodCounts(list);
+  const sleep = sleepSummary(list);
   const tags = usedTags(list);
 
   return (
@@ -200,7 +206,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
         이 기간의 상태 기록 {suff.count}개 · {suff.days}일
       </p>
 
-      {!suff.enough && area !== 'activity' && (
+      {!suff.enough && area !== 'activity' && area !== 'sleep' && (
         <section className="card p-4">
           <p className="font-semibold">아직 패턴을 발견하기에는 기록이 조금 더 필요해요.</p>
           <p className="mt-1 text-[14px] text-muted">
@@ -210,7 +216,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
       )}
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
-        {(suff.enough || area === 'activity') && <Observations list={observations} byId={byId} onOpen={onOpen} />}
+        {(suff.enough || area === 'activity' || (area === 'sleep' && sleep)) && <Observations list={observations} byId={byId} onOpen={onOpen} />}
 
         {area === 'mood' &&
           (moods.length ? (
@@ -236,6 +242,41 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
           ))}
 
         {(area === 'energy' || area === 'focus' || area === 'stress') && <ScaleCharts key={area} list={list} scale={area} />}
+
+        {area === 'sleep' &&
+          (sleep ? (
+            <section className="card p-4">
+              <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+                {[
+                  ['평균 수면', fmtMinutes(sleep.avgMinutes)],
+                  ['평균 잠든 시각', fmtClock(sleep.avgBed)],
+                  ['평균 일어난 시각', fmtClock(sleep.avgWake)],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-2xl bg-bg px-2 py-2.5">
+                    <p className="text-[11px] text-muted">{label}</p>
+                    <p className="text-[15px] font-bold">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <ChartBox>
+                <BarChart data={sleep.nights} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={12} />
+                  <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v}시간`, '수면']} />
+                  <Bar dataKey="hours" fill={SAGE} radius={[8, 8, 3, 3]} maxBarSize={28} />
+                </BarChart>
+              </ChartBox>
+              <p className="mt-2 text-center text-[12px] text-muted">일어난 날 기준 · 수면 기록 {sleep.count}개</p>
+            </section>
+          ) : (
+            <section className="card p-4">
+              <p className="font-semibold">아직 수면 기록이 적어요.</p>
+              <p className="mt-1 text-[14px] text-muted">
+                수면 기록이 {MIN_SLEEPS}번 이상 모이면 평균과 흐름을 보여드릴게요. 아침에 처음 앱을 열면 어젯밤 수면을 물어봐요.
+              </p>
+            </section>
+          ))}
 
         {area === 'rhythm' && (
           <section className="card p-4">

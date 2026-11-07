@@ -36,7 +36,7 @@ export async function exportJSON(records: LifeRecord[], settings: Settings) {
 }
 
 const CSV_FIELDS: (keyof LifeRecord)[] = [
-  'occurred_at', 'created_at', 'record_type', 'mood', 'energy', 'focus', 'stress', 'tags', 'content', 'source', 'id',
+  'occurred_at', 'started_at', 'created_at', 'record_type', 'mood', 'energy', 'focus', 'stress', 'tags', 'content', 'source', 'id',
 ];
 
 export function exportCSV(records: LifeRecord[]) {

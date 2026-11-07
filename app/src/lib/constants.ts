@@ -45,10 +45,11 @@ export const RECORD_TYPES: Record<RecordType, { label: string; placeholder: stri
   event: { label: '사건', placeholder: '어떤 일이 있었나요?' },
   idea: { label: '아이디어', placeholder: '떠오른 아이디어를 적어두세요' },
   thought: { label: '자유로운 생각', placeholder: '머릿속에 떠오르는 것을 그대로' },
+  sleep: { label: '수면', placeholder: '잠에 대해 남기고 싶은 말 (선택) · 예: 중간에 깼다' },
 };
 
 /** + 버튼에서 고를 수 있는 추가 기록 종류 (순서대로 표시) */
-export const EXTRA_TYPES: RecordType[] = ['text', 'voice', 'photo', 'event', 'idea', 'thought'];
+export const EXTRA_TYPES: RecordType[] = ['text', 'voice', 'photo', 'event', 'idea', 'thought', 'sleep'];
 
 export const REMINDER_MESSAGES = [
   '지금의 나를 잠깐 살펴볼까요?',

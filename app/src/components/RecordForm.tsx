@@ -3,7 +3,7 @@
 import { Camera, Clock, ImagePlus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RECORD_SCALES, RECORD_TYPES, SCALES } from '../lib/constants';
-import { fmtDate, fmtTime, fromLocalInput, toLocalInput } from '../lib/dates';
+import { fmtDate, fmtMinutes, fmtTime, fromLocalInput, toLocalInput } from '../lib/dates';
 import { compressImage } from '../lib/media';
 import { useRecords } from '../lib/records';
 import { useSettings } from '../lib/settings';
@@ -40,6 +40,11 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
   });
   const [tagText, setTagText] = useState(initial?.tags.join(', ') ?? '');
   const [occurred, setOccurred] = useState(toLocalInput(initial?.occurred_at ?? new Date().toISOString()));
+  // 수면: 잠든 시각 (새로 쓸 때는 8시간 전으로 시작)
+  const [started, setStarted] = useState(
+    toLocalInput(initial?.started_at ?? new Date(Date.now() - 8 * 3600_000).toISOString()),
+  );
+  const sleepMin = (Date.parse(fromLocalInput(occurred)) - Date.parse(fromLocalInput(started))) / 60000;
   // 사건은 "언제 있었던 일인지"가 중요하므로 처음부터 시각 입력을 보여준다
   const [whenOpen, setWhenOpen] = useState(type === 'event' || isEdit);
   const [whenHint, setWhenHint] = useState<string | null>(null);
@@ -76,6 +81,8 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
     if (type === 'photo' && !blob && !hasExistingMedia) return '사진을 골라주세요.';
     if (type === 'voice' && !blob && !hasExistingMedia) return '녹음하거나 음성 파일을 올려주세요.';
     if (occurred > nowLocal) return '아직 오지 않은 시각은 고를 수 없어요.';
+    if (type === 'sleep' && !(sleepMin > 0)) return '일어난 시각이 잠든 시각보다 늦어야 해요.';
+    if (type === 'sleep' && sleepMin > 20 * 60) return '20시간이 넘는 잠은 기록할 수 없어요. 날짜를 확인해 주세요.';
     return null;
   }
 
@@ -89,6 +96,7 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
       tags: parseTags(tagText),
       occurred_at: fromLocalInput(occurred),
       ...(type === 'checkin' ? { mood, ...levels } : {}),
+      ...(type === 'sleep' ? { started_at: fromLocalInput(started), tags: [] } : {}),
     };
     try {
       if (isEdit) {
@@ -162,8 +170,22 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
           <VoiceRecorder onChange={setBlob} />
         ))}
 
+      {type === 'sleep' && (
+        <div className="space-y-3">
+          <div>
+            <label className="label">잠든 시각</label>
+            <input type="datetime-local" className="field" value={started} max={nowLocal} onChange={(e) => setStarted(e.target.value)} />
+          </div>
+          <div>
+            <label className="label">일어난 시각</label>
+            <input type="datetime-local" className="field" value={occurred} max={nowLocal} onChange={(e) => setOccurred(e.target.value)} />
+          </div>
+          {sleepMin > 0 && <p className="text-[13px] text-muted">{fmtMinutes(sleepMin)} 잤어요</p>}
+        </div>
+      )}
+
       <div>
-        {type !== 'checkin' && <label className="label">{type === 'event' ? '어떤 일이 있었나요?' : '내용'}</label>}
+        {type !== 'checkin' && <label className="label">{type === 'event' ? '어떤 일이 있었나요?' : type === 'sleep' ? '메모 (선택)' : '내용'}</label>}
         <textarea
           className="field min-h-[88px] resize-y leading-relaxed"
           value={content}
@@ -173,14 +195,14 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
         />
       </div>
 
-      {type !== 'checkin' && (
+      {type !== 'checkin' && type !== 'sleep' && (
         <div>
           <label className="label">태그 (선택 · 일, 장소, 상황)</label>
           <input className="field" value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="예: 산책, 회사, 카페" />
         </div>
       )}
 
-      <div>
+      <div className={type === 'sleep' ? 'hidden' : ''}>
         {whenOpen ? (
           <>
             <label className="label">{type === 'event' ? '언제 있었던 일인가요?' : type === 'photo' ? '촬영 시각' : '언제의 일인가요?'}</label>

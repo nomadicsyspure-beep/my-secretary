@@ -79,3 +79,30 @@ export function todayAt(hhmm: string, now = new Date()): Date {
 export function isRecalled(occurred_at: string, created_at: string): boolean {
   return Date.parse(created_at) - Date.parse(occurred_at) > 30 * 60 * 1000;
 }
+
+/** 분 → '7시간 40분' */
+export function fmtMinutes(min: number): string {
+  const m = Math.round(min);
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return h ? `${h}시간${r ? ` ${r}분` : ''}` : `${r}분`;
+}
+
+/** 하루 중 몇 분째인지 → 'HH:MM' */
+export function fmtClock(minuteOfDay: number): string {
+  const m = ((Math.round(minuteOfDay) % 1440) + 1440) % 1440;
+  return `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+}
+
+/**
+ * 시각만 고른 수면 기록을 실제 날짜로 바꾼다.
+ * 일어난 시각: 오늘 (아직 오지 않은 시각이면 어제)
+ * 잠든 시각: 일어난 날 그 시각, 일어난 시각보다 늦으면 그 전날 (예: 23:30 → 07:10)
+ */
+export function resolveSleep(bedHHMM: string, wakeHHMM: string, now = new Date()): { start: Date; end: Date } {
+  const end = todayAt(wakeHHMM, now);
+  if (end.getTime() > now.getTime()) end.setDate(end.getDate() - 1);
+  const start = todayAt(bedHHMM, end);
+  if (start.getTime() >= end.getTime()) start.setDate(start.getDate() - 1);
+  return { start, end };
+}

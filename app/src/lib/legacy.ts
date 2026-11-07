@@ -36,7 +36,7 @@ export function convertLegacy(): LifeRecord[] {
     const iso = new Date(Math.min(at, Date.now())).toISOString();
     return {
       id, user_id: LOCAL_USER, record_type: type, content: null, mood: null, energy: null, focus: null, stress: null,
-      tags: [], occurred_at: iso, created_at: iso, updated_at: iso, source: 'legacy',
+      tags: [], occurred_at: iso, started_at: null, created_at: iso, updated_at: iso, source: 'legacy',
       attachment_url: null, attachment_mime: null, transcript: null, prompt: null, ...patch,
     };
   };

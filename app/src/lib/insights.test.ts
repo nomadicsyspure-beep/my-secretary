@@ -6,8 +6,11 @@ import {
   moodObservations,
   scaleObservations,
   sufficiency,
+  sleepObservations,
+  sleepSummary,
   tagObservations,
 } from './insights';
+import { resolveSleep } from './dates';
 import type { RecordInput } from './records';
 import type { LifeRecord } from './types';
 
@@ -65,5 +68,31 @@ describe('insights', () => {
     const week = inPeriod(records, 7, NOW);
     expect(week).toHaveLength(2);
     expect(dailyAverages(week, 'energy')).toEqual([{ date: '2026-11-20', label: '11/20', avg: 3, n: 2 }]);
+  });
+
+  it('시각만 고른 수면을 날짜로 바꾼다 (자정을 넘긴 잠)', () => {
+    const now = new Date(2026, 10, 20, 9, 0);
+    const a = resolveSleep('23:30', '07:10', now);
+    expect([a.start.getDate(), a.start.getHours(), a.end.getDate(), a.end.getHours()]).toEqual([19, 23, 20, 7]);
+    const b = resolveSleep('01:00', '08:00', now);
+    expect([b.start.getDate(), b.start.getHours(), b.end.getDate()]).toEqual([20, 1, 20]);
+    // 아직 오지 않은 기상 시각이면 어제 아침으로 본다
+    const c = resolveSleep('23:00', '10:00', now);
+    expect([c.start.getDate(), c.end.getDate()]).toEqual([18, 19]);
+  });
+
+  it('수면 평균과, 적게 잔 날과 많이 잔 날의 상태를 비교한다', () => {
+    const sleep = (day: number, hours: number) =>
+      rec({ record_type: 'sleep', started_at: new Date(2026, 10, day - 1, 23, 0).toISOString(), occurred_at: new Date(2026, 10, day - 1, 23 + hours, 0).toISOString() });
+    const records = [
+      ...[10, 11, 12].flatMap((d) => [sleep(d, 5), rec({ focus: 2, occurred_at: at(d, 11) })]),
+      ...[13, 14, 15].flatMap((d) => [sleep(d, 8), rec({ focus: 4, occurred_at: at(d, 11) })]),
+    ];
+    const s = sleepSummary(records)!;
+    expect(Math.round(s.avgMinutes)).toBe(390);
+    expect(s.avgBed).toBe(23 * 60);
+    const obs = sleepObservations(records);
+    expect(obs).toHaveLength(1);
+    expect(obs[0].text).toContain('집중력 평균은 2');
   });
 });

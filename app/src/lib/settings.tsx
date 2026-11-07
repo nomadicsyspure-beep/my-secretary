@@ -14,6 +14,11 @@ export interface Settings {
   recall: { enabled: boolean; time: string };
   /** 기억 복원 카드를 '나중에 할게요' 한 날 (YYYY-MM-DD) */
   recallDismissedOn: string | null;
+  /** 아침에 어젯밤 수면을 물어볼지 */
+  sleepPrompt: boolean;
+  /** 수면 기록 창을 그날 처음 자동으로 띄운 날 / '오늘은 넘어갈게요' 한 날 */
+  sleepPromptedOn: string | null;
+  sleepDismissedOn: string | null;
   legacyImported: boolean;
 }
 
@@ -24,6 +29,9 @@ export const DEFAULT_SETTINGS: Settings = {
   reminders: { enabled: false, times: ['10:00', '15:00', '20:30'] },
   recall: { enabled: true, time: '21:00' },
   recallDismissedOn: null,
+  sleepPrompt: true,
+  sleepPromptedOn: null,
+  sleepDismissedOn: null,
   legacyImported: false,
 };
 

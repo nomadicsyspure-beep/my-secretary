@@ -23,6 +23,7 @@ export function makeRecord(input: RecordInput, now = new Date()): LifeRecord {
     stress: null,
     tags: [],
     occurred_at: iso,
+    started_at: null,
     source: 'app',
     attachment_url: null,
     attachment_mime: null,

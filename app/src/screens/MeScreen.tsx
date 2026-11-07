@@ -167,6 +167,12 @@ export function MeScreen({ section }: { section: string | null }) {
             </p>
           </Card>
 
+          <Card title="아침 수면 기록">
+            <Row title="어젯밤 수면 묻기" desc="아침(4–15시)에 처음 열 때 한 번, 잠든·일어난 시각을 물어요">
+              <Toggle checked={settings.sleepPrompt} onChange={(v) => update({ sleepPrompt: v })} label="어젯밤 수면 묻기" />
+            </Row>
+          </Card>
+
           <Card title="기억 복원">
             <Row title="하루 돌아보기 카드" desc="정한 시각 이후 홈에 질문이 나타나요">
               <Toggle checked={settings.recall.enabled} onChange={(v) => update({ recall: { ...settings.recall, enabled: v } })} label="기억 복원" />
