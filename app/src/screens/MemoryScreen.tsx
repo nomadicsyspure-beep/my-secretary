@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { Calendar } from '../components/Calendar';
 import { RecordCard, TYPE_ICONS } from '../components/RecordCard';
 import { Empty, Segmented } from '../components/ui';
-import { MOODS, RECORD_TYPES } from '../lib/constants';
+import { ALL_MOODS, MOODS, RECORD_TYPES, moodOf } from '../lib/constants';
 import { dateKey, fmtDate, fmtDayLabel, parseDateKey } from '../lib/dates';
 import { useRecords } from '../lib/records';
 import { navigate } from '../lib/router';
@@ -21,7 +21,7 @@ function matches(r: LifeRecord, q: string) {
     r.prompt,
     r.tags.join(' '),
     RECORD_TYPES[r.record_type].label,
-    MOODS.find((m) => m.key === r.mood)?.label,
+    moodOf(r.mood)?.label,
     fmtDate(r.occurred_at),
   ]
     .filter(Boolean)
@@ -58,6 +58,7 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
   }, [filtered]);
 
   const filtering = !!(query.trim() || type || mood);
+  const moodChoices = ALL_MOODS.filter((m) => MOODS.includes(m) || records.some((r) => r.mood === m.key));
   // 주소에 날짜가 있으면 그날만 보여준다 (홈의 "오늘 전체 보기" 등)
   const groups = date ? [[date, byDay.get(date) ?? []] as const] : [...byDay.entries()];
 
@@ -76,9 +77,9 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
 
   return (
     <div>
-      <header className="flex items-end justify-between py-3">
+      <header className="flex items-end justify-between pb-1">
         <div>
-          <h1 className="font-display text-[26px] font-bold">기억</h1>
+          <h1 className="font-display text-[22px] font-bold">기억</h1>
           <p className="text-[13px] text-muted">지나온 순간들을 다시 만나요</p>
         </div>
         <Segmented
@@ -94,9 +95,9 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
 
       <div className="mt-2 flex gap-2">
         <label className="relative flex-1">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
-            className="field rounded-full pl-11"
+            className="field rounded-full pl-10"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -107,7 +108,7 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
           />
         </label>
         <button
-          className={`grid h-12 w-12 shrink-0 place-items-center rounded-full border ${showFilters || type || mood ? 'border-primary bg-primary-soft text-primary' : 'border-line bg-card text-muted'}`}
+          className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border ${showFilters || type || mood ? 'border-primary bg-primary-soft text-primary' : 'border-line bg-card text-muted'}`}
           onClick={() => setShowFilters((v) => !v)}
           aria-label="종류·감정으로 거르기"
           aria-expanded={showFilters}
@@ -134,7 +135,7 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
           <div>
             <p className="label">감정</p>
             <div className="flex flex-wrap gap-1.5">
-              {MOODS.map((m) => (
+              {moodChoices.map((m) => (
                 <button key={m.key} className={`chip ${mood === m.key ? 'chip-on' : ''}`} onClick={() => setMood(mood === m.key ? null : m.key)}>
                   {m.emoji} {m.label}
                 </button>
@@ -154,7 +155,7 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
         {records.length === 0 ? (
           <Empty title="아직 기록이 없어요">기록이 쌓이면 여기서 지난 순간들을 다시 볼 수 있어요.</Empty>
         ) : view === 'calendar' ? (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,380px)_1fr]">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
             <Calendar
               month={month}
               onMonth={setMonth}
@@ -173,7 +174,7 @@ export function MemoryScreen({ date, onOpen }: { date: string | null; onOpen: (r
         ) : groups.length === 0 || (date && !(byDay.get(date) ?? []).length) ? (
           <p className="py-10 text-center text-[14px] text-muted">{filtering ? '조건에 맞는 기록이 없어요.' : '이날은 기록이 없어요.'}</p>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {groups.slice(0, pages * PAGE).map(([key, list]) => (
               <section key={key}>
                 <h2 className="mb-2.5 flex items-center gap-2 px-1 text-[14px] font-bold">

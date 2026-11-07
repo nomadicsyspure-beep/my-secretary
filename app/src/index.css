@@ -56,10 +56,10 @@ button {
 
 @layer components {
   .card {
-    @apply rounded-4xl border border-line bg-card shadow-soft;
+    @apply rounded-3xl border border-line bg-card shadow-soft;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-[15px] font-semibold transition active:scale-[.97] disabled:opacity-40 disabled:active:scale-100;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[14px] font-semibold transition active:scale-[.97] disabled:opacity-40 disabled:active:scale-100;
   }
   .btn-primary {
     @apply btn bg-primary text-primary-ink;
@@ -68,13 +68,13 @@ button {
     @apply btn border border-line bg-card text-ink;
   }
   .field {
-    @apply w-full rounded-2xl border border-line bg-bg px-4 py-3 text-[15px] text-ink outline-none placeholder:text-muted/70 focus:border-primary;
+    @apply w-full rounded-xl border border-line bg-bg px-3.5 py-2.5 text-[14px] text-ink outline-none placeholder:text-muted/70 focus:border-primary;
   }
   .label {
-    @apply mb-2 block text-[13px] font-semibold text-muted;
+    @apply mb-1.5 block text-[12px] font-semibold text-muted;
   }
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-line bg-bg px-3 py-1.5 text-[13px] text-ink;
+    @apply inline-flex items-center gap-1 rounded-full border border-line bg-bg px-2.5 py-1 text-[12px] text-ink;
   }
   .chip-on {
     @apply border-primary bg-primary-soft font-semibold;

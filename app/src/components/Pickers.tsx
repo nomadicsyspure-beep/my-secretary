@@ -1,4 +1,4 @@
-// 원터치 기록용 선택 버튼들
+// 원터치 기록용 선택 버튼들 (한 화면에 다 들어오도록 작게)
 
 import { Cloud, Target, Zap } from 'lucide-react';
 import { MOODS, SCALES } from '../lib/constants';
@@ -6,7 +6,7 @@ import type { Level, MoodKey, ScaleKey } from '../lib/types';
 
 export function MoodPicker({ value, onChange }: { value: MoodKey | null; onChange: (v: MoodKey | null) => void }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-6 gap-1">
       {MOODS.map((m) => {
         const on = value === m.key;
         return (
@@ -14,13 +14,13 @@ export function MoodPicker({ value, onChange }: { value: MoodKey | null; onChang
             key={m.key}
             onClick={() => onChange(on ? null : m.key)}
             aria-pressed={on}
-            className={`flex flex-col items-center gap-1 rounded-3xl border py-3 transition active:scale-95 ${
-              on ? 'border-primary shadow-sm ring-2 ring-primary/30' : 'border-line bg-bg'
+            className={`flex flex-col items-center gap-0.5 rounded-2xl border py-2 transition active:scale-95 ${
+              on ? 'border-primary ring-2 ring-primary/30' : 'border-line bg-bg'
             }`}
-            style={on ? { background: `${m.color}66` } : undefined}
+            style={on ? { background: `${m.color}77` } : undefined}
           >
-            <span className={`text-[28px] leading-none ${on ? 'animate-pop' : ''}`}>{m.emoji}</span>
-            <span className={`text-[12px] ${on ? 'font-bold' : 'text-muted'}`}>{m.label}</span>
+            <span className={`text-[24px] leading-none ${on ? 'animate-pop' : ''}`}>{m.emoji}</span>
+            <span className={`whitespace-nowrap text-[11px] tracking-tighter ${on ? 'font-bold' : 'text-muted'}`}>{m.label}</span>
           </button>
         );
       })}
@@ -43,13 +43,13 @@ export function ScalePicker({
   const Icon = SCALE_ICONS[scale];
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between px-1">
-        <span className="flex items-center gap-1.5 text-[14px] font-semibold">
-          <Icon size={16} className="text-primary" />
+      <div className="mb-1.5 flex items-center justify-between px-0.5">
+        <span className="flex items-center gap-1 text-[13px] font-semibold">
+          <Icon size={14} className="text-primary" />
           {s.label}
         </span>
-        <span className={`text-[13px] ${value ? 'font-semibold text-primary' : 'text-muted'}`}>
-          {value ? s.levels[value - 1] : '선택 안 함'}
+        <span className={`text-[12px] ${value ? 'font-semibold text-primary' : 'text-muted'}`}>
+          {value ? s.levels[value - 1] : `${s.levels[0]} → ${s.levels[4]}`}
         </span>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
@@ -61,22 +61,15 @@ export function ScalePicker({
               onClick={() => onChange(on ? null : lv)}
               aria-pressed={on}
               aria-label={`${s.label} ${s.levels[lv - 1]}`}
-              className={`flex h-12 items-end justify-center rounded-2xl border pb-2 transition active:scale-95 ${
+              className={`flex h-9 items-end justify-center rounded-xl border pb-1.5 transition active:scale-95 ${
                 on ? 'border-primary bg-primary-soft ring-2 ring-primary/30' : 'border-line bg-bg'
               }`}
             >
               {/* 높이로 정도를 보여주는 작은 막대 */}
-              <span
-                className={`w-2.5 rounded-full transition ${on ? 'bg-primary' : 'bg-sage/50'}`}
-                style={{ height: 6 + lv * 5 }}
-              />
+              <span className={`w-2 rounded-full transition ${on ? 'bg-primary' : 'bg-sage/50'}`} style={{ height: 4 + lv * 3.5 }} />
             </button>
           );
         })}
-      </div>
-      <div className="mt-1 flex justify-between px-1 text-[11px] text-muted">
-        <span>{s.levels[0]}</span>
-        <span>{s.levels[4]}</span>
       </div>
     </div>
   );

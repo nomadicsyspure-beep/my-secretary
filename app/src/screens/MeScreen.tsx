@@ -4,7 +4,7 @@ import { Download, FileSpreadsheet, History, Plus, ShieldCheck, Trash2, Upload, 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Segmented, Sprout, Toggle } from '../components/ui';
 import { exportCSV, exportJSON, importJSON } from '../lib/backup';
-import { APP_VERSION, SCALES } from '../lib/constants';
+import { APP_VERSION, RECORD_SCALES, scaleOf } from '../lib/constants';
 import { convertLegacy, hasLegacyData } from '../lib/legacy';
 import { formatBytes } from '../lib/media';
 import { useRecords } from '../lib/records';
@@ -16,8 +16,8 @@ import { useToast } from '../lib/toast';
 function Card({ id, title, children }: { id?: string; title: string; children: ReactNode }) {
   return (
     <section id={id} className="card scroll-mt-4 p-5">
-      <h2 className="mb-4 font-display text-[18px] font-bold">{title}</h2>
-      <div className="space-y-4">{children}</div>
+      <h2 className="mb-3 font-display text-[16px] font-bold">{title}</h2>
+      <div className="space-y-3">{children}</div>
     </section>
   );
 }
@@ -26,7 +26,7 @@ function Row({ title, desc, children }: { title: string; desc?: string; children
   return (
     <div className="flex items-center justify-between gap-4">
       <div>
-        <p className="text-[15px] font-semibold">{title}</p>
+        <p className="text-[14px] font-semibold">{title}</p>
         {desc && <p className="text-[13px] text-muted">{desc}</p>}
       </div>
       {children}
@@ -104,14 +104,14 @@ export function MeScreen({ section }: { section: string | null }) {
   }
 
   return (
-    <div className="space-y-4">
-      <header className="py-3">
-        <h1 className="font-display text-[26px] font-bold">나</h1>
+    <div className="space-y-3">
+      <header className="pb-1">
+        <h1 className="font-display text-[22px] font-bold">나</h1>
         <p className="text-[13px] text-muted">LIFE OS를 나에게 맞게</p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-3">
           <Card title="프로필">
             <div>
               <label className="label" htmlFor="name">
@@ -183,10 +183,10 @@ export function MeScreen({ section }: { section: string | null }) {
           </Card>
 
           <Card title="기록 설정">
-            <p className="-mt-2 text-[13px] text-muted">홈 화면에서 원터치로 기록할 항목</p>
-            {SCALES.map((s) => (
-              <Row key={s.key} title={s.label}>
-                <Toggle checked={settings.scales[s.key]} onChange={(v) => update({ scales: { ...settings.scales, [s.key]: v } })} label={s.label} />
+            <p className="-mt-2 text-[13px] text-muted">홈 화면에서 감정과 함께 원터치로 기록할 항목</p>
+            {RECORD_SCALES.map((k) => (
+              <Row key={k} title={scaleOf(k).label}>
+                <Toggle checked={settings.scales[k]} onChange={(v) => update({ scales: { ...settings.scales, [k]: v } })} label={scaleOf(k).label} />
               </Row>
             ))}
           </Card>
@@ -204,7 +204,7 @@ export function MeScreen({ section }: { section: string | null }) {
           </Card>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Card title="데이터 관리">
             <p className="-mt-2 text-[14px]">모든 기록은 나의 것이에요. 언제든 내보내고 지울 수 있어요.</p>
             <div className="grid grid-cols-2 gap-2">

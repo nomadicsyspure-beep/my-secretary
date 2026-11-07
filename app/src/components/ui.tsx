@@ -18,8 +18,8 @@ export function Sprout({ size = 22, className = '' }: { size?: number; className
 export function Logo() {
   return (
     <div className="flex items-center gap-2 text-primary">
-      <Sprout size={24} />
-      <span className="font-display text-[19px] font-bold tracking-wide text-ink">LIFE OS</span>
+      <Sprout size={20} />
+      <span className="font-display text-[17px] font-bold tracking-wide text-ink">LIFE OS</span>
     </div>
   );
 }
@@ -46,11 +46,11 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative max-h-[92dvh] w-full max-w-lg animate-sheet overflow-y-auto rounded-t-4xl bg-card px-5 pb-[calc(24px+env(safe-area-inset-bottom))] pt-3 shadow-soft md:rounded-4xl md:pt-5"
+        className="relative max-h-[92dvh] w-full max-w-lg animate-sheet overflow-y-auto rounded-t-3xl bg-card px-4 pb-[calc(20px+env(safe-area-inset-bottom))] pt-2.5 shadow-soft md:rounded-3xl md:pt-4"
       >
         <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line md:hidden" />
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{title}</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-bold">{title}</h2>
           <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-bg" aria-label="닫기">
             <X size={20} />
           </button>
@@ -81,7 +81,7 @@ export function Segmented<T extends string | number>({
           role="tab"
           aria-selected={o.value === value}
           onClick={() => onChange(o.value)}
-          className={`flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition ${
+          className={`flex-1 rounded-full px-3 py-1.5 text-[13px] font-semibold transition ${
             o.value === value ? 'bg-primary text-primary-ink shadow-sm' : 'text-muted'
           }`}
         >
@@ -108,8 +108,8 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="mb-3 mt-7 flex items-center justify-between px-1">
-      <h2 className="text-[15px] font-bold">{children}</h2>
+    <div className="mb-2 mt-5 flex items-center justify-between px-1">
+      <h2 className="text-[14px] font-bold">{children}</h2>
       {action}
     </div>
   );
@@ -117,7 +117,7 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
 
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="card flex flex-col items-center px-6 py-10 text-center">
+    <div className="card flex flex-col items-center px-6 py-8 text-center">
       <Sprout size={34} className="mb-3 text-sage" />
       <p className="font-semibold">{title}</p>
       {children && <div className="mt-1 text-sm text-muted">{children}</div>}

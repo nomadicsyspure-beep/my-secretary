@@ -93,7 +93,7 @@ function Shell() {
 
   return (
     <div className="min-h-dvh md:pl-24">
-      <main className="mx-auto max-w-5xl px-4 pb-[calc(110px+env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] md:px-8 md:pb-12 md:pt-6">
+      <main className="mx-auto max-w-5xl px-4 pb-[calc(76px+env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))] md:px-8 md:pb-12 md:pt-6">
         {screen}
       </main>
       <Nav current={route.tab} />

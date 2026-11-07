@@ -28,7 +28,7 @@ export function Calendar({
   const shift = (n: number) => onMonth(new Date(month.getFullYear(), month.getMonth() + n, 1));
 
   return (
-    <div className="card p-4">
+    <div className="card p-3">
       <div className="mb-3 flex items-center justify-between">
         <button className="grid h-9 w-9 place-items-center rounded-full hover:bg-bg" onClick={() => shift(-1)} aria-label="이전 달">
           <ChevronLeft size={20} />
@@ -61,7 +61,7 @@ export function Calendar({
               onClick={() => onSelect(key)}
               aria-label={`${d.getMonth() + 1}월 ${d.getDate()}일${list.length ? `, 기록 ${list.length}개` : ''}`}
               aria-pressed={on}
-              className={`mx-auto flex h-12 w-11 flex-col items-center justify-center gap-1 rounded-2xl text-[14px] transition ${
+              className={`mx-auto flex h-10 w-10 flex-col items-center justify-center gap-0.5 rounded-xl text-[13px] transition ${
                 on ? 'bg-primary text-primary-ink' : key === today ? 'bg-primary-soft font-bold' : 'hover:bg-bg'
               }`}
             >

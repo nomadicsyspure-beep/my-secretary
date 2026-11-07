@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toast && (
           <div
             key={toast.id}
-            className="fixed bottom-[calc(96px+env(safe-area-inset-bottom))] left-1/2 z-[60] flex w-max max-w-[calc(100%-32px)] -translate-x-1/2 animate-toast items-center gap-3 rounded-full bg-forest px-5 py-3 text-white shadow-soft dark:bg-primary dark:text-primary-ink md:bottom-8"
+            className="fixed bottom-[calc(72px+env(safe-area-inset-bottom))] left-1/2 z-[60] flex w-max max-w-[calc(100%-32px)] -translate-x-1/2 animate-toast items-center gap-2.5 rounded-full bg-forest px-4 py-2.5 text-white shadow-soft dark:bg-primary dark:text-primary-ink md:bottom-8"
           >
             <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/20">
               {toast.tone === 'done' ? <Check size={16} strokeWidth={3} /> : <Info size={16} />}

@@ -2,7 +2,7 @@
 
 import { Camera, Clock, ImagePlus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { RECORD_TYPES, SCALES } from '../lib/constants';
+import { RECORD_SCALES, RECORD_TYPES, SCALES } from '../lib/constants';
 import { fmtDate, fmtTime, fromLocalInput, toLocalInput } from '../lib/dates';
 import { compressImage } from '../lib/media';
 import { useRecords } from '../lib/records';
@@ -118,13 +118,13 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
   }
 
   return (
-    <div className="space-y-5">
-      {prompt && <p className="rounded-3xl bg-primary-soft px-4 py-3 text-[15px] font-semibold">{prompt}</p>}
+    <div className="space-y-4">
+      {prompt && <p className="rounded-2xl bg-primary-soft px-3.5 py-2.5 text-[14px] font-semibold">{prompt}</p>}
 
       {type === 'checkin' && (
         <>
           <MoodPicker value={mood} onChange={setMood} />
-          {SCALES.filter((s) => isEdit || settings.scales[s.key]).map((s) => (
+          {SCALES.filter((s) => (RECORD_SCALES.includes(s.key) ? isEdit || settings.scales[s.key] : initial?.[s.key] != null)).map((s) => (
             <ScalePicker key={s.key} scale={s.key} value={levels[s.key]} onChange={(v) => setLevels((l) => ({ ...l, [s.key]: v }))} />
           ))}
         </>
@@ -165,7 +165,7 @@ export function RecordForm({ type, initial, prompt = null, source = 'app', onDon
       <div>
         {type !== 'checkin' && <label className="label">{type === 'event' ? '어떤 일이 있었나요?' : '내용'}</label>}
         <textarea
-          className="field min-h-[110px] resize-y leading-relaxed"
+          className="field min-h-[88px] resize-y leading-relaxed"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={RECORD_TYPES[type].placeholder}

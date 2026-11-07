@@ -28,10 +28,10 @@ export function Nav({ current }: { current: Tab }) {
               <button
                 onClick={() => navigate(tab)}
                 aria-current={on ? 'page' : undefined}
-                className={`flex w-full flex-col items-center gap-1 py-2.5 text-[11px] transition md:py-3 ${on ? 'font-bold text-primary' : 'text-muted'}`}
+                className={`flex w-full flex-col items-center gap-0.5 py-1.5 text-[10.5px] transition md:py-3 ${on ? 'font-bold text-primary' : 'text-muted'}`}
               >
-                <span className={`grid h-8 w-12 place-items-center rounded-full transition ${on ? 'bg-primary-soft' : ''}`}>
-                  <Icon size={21} strokeWidth={on ? 2.4 : 1.9} />
+                <span className={`grid h-7 w-11 place-items-center rounded-full transition ${on ? 'bg-primary-soft' : ''}`}>
+                  <Icon size={19} strokeWidth={on ? 2.4 : 1.9} />
                 </span>
                 {label}
               </button>

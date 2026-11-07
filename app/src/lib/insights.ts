@@ -6,7 +6,7 @@
 // - 상관관계를 원인처럼 말하지 않는다. "~한 경향이 있어요" 처럼 관찰만 전한다.
 // - 모든 문장에는 근거가 된 기록 id 를 붙인다.
 
-import { MOODS, scaleOf } from './constants';
+import { ALL_MOODS, RECORD_SCALES, moodOf, scaleOf } from './constants';
 import { PARTS, WEEKDAYS, dateKey, partOfDay } from './dates';
 import type { LifeRecord, MoodKey, ScaleKey } from './types';
 
@@ -94,7 +94,7 @@ export function weekdayCounts(records: LifeRecord[]) {
 }
 
 export function moodCounts(records: LifeRecord[]) {
-  return MOODS.map((m) => ({ ...m, count: records.filter((r) => r.mood === m.key).length }))
+  return ALL_MOODS.map((m) => ({ ...m, count: records.filter((r) => r.mood === m.key).length }))
     .filter((m) => m.count > 0)
     .sort((a, b) => b.count - a.count);
 }
@@ -164,7 +164,7 @@ export function scaleObservations(records: LifeRecord[], key: ScaleKey, now = ne
 export function moodObservations(records: LifeRecord[]): Observation[] {
   const list = records.filter((r) => r.mood != null);
   const out: Observation[] = [];
-  const name = (k: MoodKey) => MOODS.find((m) => m.key === k)!.label;
+  const name = (k: MoodKey) => moodOf(k)!.label;
 
   const top = (group: LifeRecord[]) => {
     const counts = new Map<MoodKey, number>();
@@ -222,7 +222,7 @@ export function tagObservations(records: LifeRecord[]): Observation[] {
   const out: Observation[] = [];
   for (const [tag, days] of tagDays) {
     if (days.size < MIN_GROUP) continue;
-    for (const key of ['energy', 'focus', 'stress'] as ScaleKey[]) {
+    for (const key of RECORD_SCALES) {
       const list = withScale(records, key);
       const on = list.filter((r) => days.has(dateKey(r.occurred_at)));
       const off = list.filter((r) => !days.has(dateKey(r.occurred_at)));

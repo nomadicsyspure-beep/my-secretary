@@ -14,17 +14,17 @@ function sceneFor(hour: number): Scene {
   if (hour >= 5 && hour < 9)
     return { sky: ['#F6D6B1', '#FBEEDB'], sun: { x: 92, y: 122, r: 30, inner: '#FFF3CF', outer: '#F5C068' }, hills: ['#DCDDBF', '#B4C199', '#8C9E67'], rock: '#B9AE97', night: false };
   if (hour >= 9 && hour < 16)
-    return { sky: ['#E5EDD5', '#FBF6EA'], sun: { x: 300, y: 58, r: 25, inner: '#FFF7DA', outer: '#F4D573' }, hills: ['#D6DEC2', '#AEBF95', '#849A5D'], rock: '#BCB29C', night: false };
+    return { sky: ['#E5EDD5', '#FBF6EA'], sun: { x: 300, y: 104, r: 22, inner: '#FFF7DA', outer: '#F4D573' }, hills: ['#D6DEC2', '#AEBF95', '#849A5D'], rock: '#BCB29C', night: false };
   if (hour >= 16 && hour < 20)
     return { sky: ['#F1BB91', '#FAE3C6'], sun: { x: 118, y: 128, r: 34, inner: '#FFE6AE', outer: '#F0A25B' }, hills: ['#D9C4A6', '#A8AD83', '#7C8B57'], rock: '#AE9E86', night: false };
-  return { sky: ['#283141', '#46506A'], sun: { x: 300, y: 54, r: 18, inner: '#FBF4DA', outer: '#E5D6A2' }, hills: ['#3B4652', '#33403A', '#29342A'], rock: '#575A50', night: true };
+  return { sky: ['#283141', '#46506A'], sun: { x: 300, y: 102, r: 16, inner: '#FBF4DA', outer: '#E5D6A2' }, hills: ['#3B4652', '#33403A', '#29342A'], rock: '#575A50', night: true };
 }
 
 export function Hero({ children }: { children: ReactNode }) {
   const s = sceneFor(new Date().getHours());
   return (
-    <div className="relative h-56 overflow-hidden rounded-4xl md:h-72">
-      <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full dark:brightness-[.82]" aria-hidden>
+    <div className="relative h-[116px] overflow-hidden rounded-3xl md:h-60">
+      <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full dark:brightness-[.82]" aria-hidden>
         <defs>
           <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={s.sky[0]} />
@@ -41,7 +41,7 @@ export function Hero({ children }: { children: ReactNode }) {
         </defs>
         <rect width="400" height="240" fill="url(#sky)" />
         {s.night &&
-          [[40, 30], [90, 60], [150, 24], [210, 48], [250, 20], [360, 90], [120, 96], [340, 28]].map(([x, y], i) => (
+          [[40, 100], [90, 124], [150, 94], [210, 112], [250, 92], [360, 128], [120, 132], [345, 96]].map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.6 : 1} fill="#FFF8E0" opacity=".8" />
           ))}
         <circle cx={s.sun.x} cy={s.sun.y} r={s.sun.r * 2.6} fill="url(#glow)" />
@@ -65,7 +65,7 @@ export function Hero({ children }: { children: ReactNode }) {
           <path d="M0 -35 c2 -6 8 -8 12 -6 c-2 5 -7 7 -12 6Z" fill="#94B05A" />
         </g>
       </svg>
-      <div className={`relative p-6 ${s.night ? 'text-[#F5EFDD]' : 'text-forest'}`}>{children}</div>
+      <div className={`relative px-4 py-3.5 ${s.night ? 'text-[#F5EFDD]' : 'text-forest'}`}>{children}</div>
     </div>
   );
 }

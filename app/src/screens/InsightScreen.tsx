@@ -32,7 +32,6 @@ import type { LifeRecord, ScaleKey } from '../lib/types';
 type Area = 'mood' | ScaleKey | 'rhythm' | 'activity';
 const AREAS: { key: Area; label: string }[] = [
   { key: 'mood', label: '감정' },
-  { key: 'energy', label: '에너지' },
   { key: 'focus', label: '집중력' },
   { key: 'stress', label: '부담감' },
   { key: 'rhythm', label: '생활 리듬' },
@@ -45,7 +44,7 @@ const tooltipStyle = { borderRadius: 14, border: '1px solid rgb(var(--line))', b
 
 function ChartBox({ children }: { children: ReactNode }) {
   return (
-    <div className="h-56 w-full">
+    <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
         {children as React.ReactElement}
       </ResponsiveContainer>
@@ -56,8 +55,8 @@ function ChartBox({ children }: { children: ReactNode }) {
 function Observations({ list, byId, onOpen }: { list: Observation[]; byId: Map<string, LifeRecord>; onOpen: (r: LifeRecord) => void }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <section className="card p-5">
-      <h2 className="mb-3 font-display text-[18px] font-bold">발견한 경향</h2>
+    <section className="card p-4">
+      <h2 className="mb-3 font-display text-[16px] font-bold">발견한 경향</h2>
       {list.length === 0 ? (
         <p className="text-[14px] text-muted">이 기간에는 뚜렷한 차이가 보이지 않아요.</p>
       ) : (
@@ -65,8 +64,8 @@ function Observations({ list, byId, onOpen }: { list: Observation[]; byId: Map<s
           {list.map((o) => {
             const evidence = o.evidence.map((id) => byId.get(id)).filter(Boolean) as LifeRecord[];
             return (
-              <li key={o.id} className="rounded-3xl bg-bg p-4">
-                <p className="text-[15px] leading-relaxed">{o.text}</p>
+              <li key={o.id} className="rounded-2xl bg-bg p-3">
+                <p className="text-[14px] leading-relaxed">{o.text}</p>
                 <button
                   className="mt-2 flex items-center gap-1 text-[13px] text-muted"
                   onClick={() => setOpen(open === o.id ? null : o.id)}
@@ -109,9 +108,9 @@ function ScaleCharts({ list, scale }: { list: LifeRecord[]; scale: ScaleKey }) {
   const daily = dailyAverages(list, scale);
   const parts = partAverages(list, scale).map((p) => ({ label: p.label, avg: p.avg, n: p.n }));
   const week = weekdayAverages(list, scale);
-  if (!daily.length) return <p className="card p-5 text-[14px] text-muted">이 기간에 기록한 {label}이(가) 없어요.</p>;
+  if (!daily.length) return <p className="card p-4 text-[14px] text-muted">이 기간에 기록한 {label}이(가) 없어요.</p>;
   return (
-    <section className="card p-5">
+    <section className="card p-4">
       <Segmented
         className="mb-4"
         value={view}
@@ -177,7 +176,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
   const tags = usedTags(list);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <Header />
       <Segmented
         value={period}
@@ -191,7 +190,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
       />
       <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1">
         {AREAS.map((a) => (
-          <button key={a.key} className={`chip shrink-0 px-4 py-2 ${area === a.key ? 'chip-on' : ''}`} onClick={() => setArea(a.key)}>
+          <button key={a.key} className={`chip shrink-0 px-3 py-1.5 ${area === a.key ? 'chip-on' : ''}`} onClick={() => setArea(a.key)}>
             {a.label}
           </button>
         ))}
@@ -202,7 +201,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
       </p>
 
       {!suff.enough && area !== 'activity' && (
-        <section className="card p-5">
+        <section className="card p-4">
           <p className="font-semibold">아직 패턴을 발견하기에는 기록이 조금 더 필요해요.</p>
           <p className="mt-1 text-[14px] text-muted">
             {MIN_DAYS}일 이상, 상태 기록 {MIN_RECORDS}개 이상이 모이면 경향을 찾아볼게요. 아래 그래프는 지금까지의 기록 그대로예요.
@@ -210,12 +209,12 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
         </section>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
         {(suff.enough || area === 'activity') && <Observations list={observations} byId={byId} onOpen={onOpen} />}
 
         {area === 'mood' &&
           (moods.length ? (
-            <section className="card p-5">
+            <section className="card p-4">
               <h2 className="mb-3 font-semibold">감정별 기록 수</h2>
               <div className="w-full" style={{ height: Math.max(120, moods.length * 40) }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -233,13 +232,13 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
               </div>
             </section>
           ) : (
-            <p className="card p-5 text-[14px] text-muted">이 기간에 기록한 감정이 없어요.</p>
+            <p className="card p-4 text-[14px] text-muted">이 기간에 기록한 감정이 없어요.</p>
           ))}
 
         {(area === 'energy' || area === 'focus' || area === 'stress') && <ScaleCharts key={area} list={list} scale={area} />}
 
         {area === 'rhythm' && (
-          <section className="card p-5">
+          <section className="card p-4">
             <Segmented
               className="mb-4"
               value={rhythmView}
@@ -263,7 +262,7 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
         )}
 
         {area === 'activity' && (
-          <section className="card p-5">
+          <section className="card p-4">
             <h2 className="mb-3 font-semibold">자주 남긴 태그</h2>
             {tags.length ? (
               <div className="flex flex-wrap gap-1.5">
@@ -285,8 +284,8 @@ export function InsightScreen({ onOpen }: { onOpen: (r: LifeRecord) => void }) {
 
 function Header() {
   return (
-    <header className="py-3">
-      <h1 className="font-display text-[26px] font-bold">인사이트</h1>
+    <header className="pb-1">
+      <h1 className="font-display text-[22px] font-bold">인사이트</h1>
       <p className="text-[13px] text-muted">쌓인 기록에서 나의 흐름을 살펴봐요</p>
     </header>
   );

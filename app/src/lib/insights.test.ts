@@ -47,9 +47,9 @@ describe('insights', () => {
     const records = [
       ...[10, 11, 12].flatMap((d) => [
         rec({ record_type: 'event', content: '산책', tags: ['산책'], occurred_at: at(d, 18) }),
-        rec({ energy: 4, occurred_at: at(d, 20) }),
+        rec({ focus: 4, occurred_at: at(d, 20) }),
       ]),
-      ...[13, 14, 15].map((d) => rec({ energy: 2, occurred_at: at(d, 20) })),
+      ...[13, 14, 15].map((d) => rec({ focus: 2, occurred_at: at(d, 20) })),
     ];
     const obs = tagObservations(records);
     expect(obs).toHaveLength(1);

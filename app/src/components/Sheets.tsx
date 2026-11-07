@@ -33,10 +33,10 @@ export function AddSheet({ request, onClose }: { request: AddRequest | null; onC
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className="flex flex-col items-center gap-2 rounded-3xl border border-line bg-bg px-3 py-5 transition active:scale-95"
+                  className="flex flex-col items-center gap-1.5 rounded-2xl border border-line bg-bg px-3 py-4 transition active:scale-95"
                 >
-                  <Icon size={26} className="text-primary" strokeWidth={1.8} />
-                  <span className="text-[14px] font-semibold">{RECORD_TYPES[t].label}</span>
+                  <Icon size={22} className="text-primary" strokeWidth={1.8} />
+                  <span className="text-[13px] font-semibold">{RECORD_TYPES[t].label}</span>
                 </button>
               );
             })}
