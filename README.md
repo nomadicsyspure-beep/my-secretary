@@ -2,7 +2,7 @@
 
 **Personal Life Operating System** · 기록은 가볍게. 분석은 깊게. 삶은 온전히.
 
-감정, 에너지, 집중력, 부담감, 생각과 경험을 가볍게 기록하고,
+감정, 집중력, 부담감, 생각과 경험을 가볍게 기록하고,
 쌓인 기록으로 나 자신을 더 깊이 이해하도록 돕는 개인용 웹앱입니다.
 
 https://nomadicsyspure-beep.github.io/my-secretary/
